@@ -1,10 +1,12 @@
 package ru.timutkin.tdd.web.request;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import ru.timutkin.tdd.enumeration.Status;
+
 
 @Data
+@AllArgsConstructor
 @Builder
 public class CreationTaskRequest {
     String taskName;

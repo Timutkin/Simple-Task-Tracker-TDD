@@ -1,1 +1,14 @@
-
+spring:
+  jpa:
+    database: postgresql
+    open-in-view: true
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/jira
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+server:
+  port: 2000
