@@ -1,10 +1,13 @@
 package ru.timutkin.tdd.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
-import java.util.List;
-import java.util.Set;
-
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "user", schema = "public")
 public class UserEntity {
@@ -22,8 +25,6 @@ public class UserEntity {
     @Column(name = "middle_name")
     String middleName;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    Set<TaskEntity> tasks;
-
+    String email;
 
 }
