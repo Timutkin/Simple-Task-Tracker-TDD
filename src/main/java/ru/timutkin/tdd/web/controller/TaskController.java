@@ -22,6 +22,9 @@ public class TaskController {
 
     @PostMapping()
     public ResponseEntity<TaskDto> createTask(@RequestBody CreationTaskRequest request){
-        return null;
+        TaskDto task = taskService.save(request);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(task);
     }
 }
