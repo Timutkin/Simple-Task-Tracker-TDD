@@ -7,8 +7,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.timutkin.tdd.enumeration.Status;
+import ru.timutkin.tdd.utils.DateFormatHM;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 
 @Getter
@@ -36,7 +38,7 @@ public class TaskEntity {
 
 
     public TaskEntity(String taskName, String message) {
-        this.dataTimeOfCreation = LocalDateTime.now();
+        this.dataTimeOfCreation = DateFormatHM.getDateTime();
         this.taskName = taskName;
         this.message = message;
         this.status = Status.OPEN;

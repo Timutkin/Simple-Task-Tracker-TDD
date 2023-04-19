@@ -22,7 +22,7 @@ import ru.timutkin.tdd.web.request.CreationTaskRequest;
 )
 public class TaskController {
 
-    TaskService taskService;
+    private final TaskService taskService;
 
     @PostMapping()
     public ResponseEntity<TaskDto> createTask(@RequestBody CreationTaskRequest request) {
