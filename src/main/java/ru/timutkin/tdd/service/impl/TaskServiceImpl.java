@@ -13,6 +13,9 @@ import ru.timutkin.tdd.service.TaskService;
 import ru.timutkin.tdd.web.handler.ApiValidationError;
 import ru.timutkin.tdd.web.request.CreationTaskRequest;
 
+import java.util.List;
+
+
 @AllArgsConstructor
 @Service
 public class TaskServiceImpl implements TaskService {
@@ -34,11 +37,20 @@ public class TaskServiceImpl implements TaskService {
                                         .object(taskRequest.getClass().getSimpleName())
                                         .field("userID")
                                         .rejectedValue(taskRequest.getUserId())
-                                        .message("User with id =" + taskRequest.getUserId() + " not found")
+                                        .message("User with id = " + taskRequest.getUserId() + " not found")
                                         .build())
                         )
         );
         taskRepository.saveAndFlush(taskEntity);
         return mapper.taskEntityToTaskDto(taskEntity);
+    }
+
+
+    @Transactional
+    public List<TaskDto> findAll(){
+        return taskRepository.findAll()
+                .stream()
+                .map(mapper::taskEntityToTaskDto)
+                .toList();
     }
 }

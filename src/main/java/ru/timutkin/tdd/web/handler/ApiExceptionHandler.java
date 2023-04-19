@@ -4,19 +4,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import ru.timutkin.tdd.exception.IncorrectDataException;
+import ru.timutkin.tdd.exception.IncorrectFieldException;
+import ru.timutkin.tdd.exception.UserNotFoundException;
+import ru.timutkin.tdd.exception.ValidationException;
 
 import java.util.List;
 
 @ControllerAdvice
 public class ApiExceptionHandler {
 
-    @ExceptionHandler(IncorrectDataException.class)
-    protected ResponseEntity<ApiError> handleValidationException(IncorrectDataException incorrectDataException){
+    @ExceptionHandler(value = {IncorrectFieldException.class, UserNotFoundException.class})
+    protected ResponseEntity<ApiError> handleValidationException(ValidationException exception){
         ApiError apiError = new ApiError(
                 HttpStatus.BAD_REQUEST,
-                List.of(incorrectDataException.getValidationError()),
-                incorrectDataException.getMessage()
+                List.of(exception.getValidationError()),
+                exception.getMessage()
         );
         return ResponseEntity.badRequest().body(apiError);
     }

@@ -3,11 +3,11 @@ package ru.timutkin.tdd.exception;
 
 import ru.timutkin.tdd.web.handler.ApiValidationError;
 
-public class IncorrectDataException extends RuntimeException {
+public class IncorrectFieldException extends RuntimeException implements ValidationException {
     private final ApiValidationError validationError;
 
 
-    public IncorrectDataException(ApiValidationError error) {
+    public IncorrectFieldException(ApiValidationError error) {
         this.validationError = error;
     }
 

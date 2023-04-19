@@ -2,7 +2,7 @@ package ru.timutkin.tdd.exception;
 
 import ru.timutkin.tdd.web.handler.ApiValidationError;
 
-public class UserNotFoundException extends RuntimeException {
+public class UserNotFoundException extends RuntimeException implements ValidationException {
     private final ApiValidationError validationError;
 
     public UserNotFoundException(ApiValidationError error) {

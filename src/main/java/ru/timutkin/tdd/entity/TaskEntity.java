@@ -3,9 +3,7 @@ package ru.timutkin.tdd.entity;
 
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import ru.timutkin.tdd.enumeration.Status;
 import ru.timutkin.tdd.utils.DateFormatHM;
 
@@ -15,6 +13,8 @@ import java.time.format.DateTimeFormatter;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "tasks", schema = "public")

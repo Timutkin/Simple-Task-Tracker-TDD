@@ -1,10 +1,7 @@
 package ru.timutkin.tdd.web.controller;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -12,11 +9,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import ru.timutkin.tdd.dto.TaskDto;
 import ru.timutkin.tdd.enumeration.Status;
-import ru.timutkin.tdd.exception.IncorrectDataException;
+import ru.timutkin.tdd.exception.IncorrectFieldException;
 import ru.timutkin.tdd.service.TaskService;
+import ru.timutkin.tdd.utils.DateFormatHM;
 import ru.timutkin.tdd.web.request.CreationTaskRequest;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -30,7 +29,6 @@ class TaskControllerTest {
 
     @InjectMocks
     TaskController controller;
-
 
     @Test
     void createTask_TaskIsValid_ReturnsValidResponse() {
@@ -51,8 +49,7 @@ class TaskControllerTest {
                 .userId(1L)
                 .status(Status.OPEN)
                 .build();
-        doReturn(task)
-                .when(this.taskService).save(request);
+        doReturn(task).when(this.taskService).save(request);
         //when
         var response = controller.createTask(request);
         //then
@@ -63,24 +60,55 @@ class TaskControllerTest {
                 () -> assertEquals(task, response.getBody())
         );
     }
-
     @Test
     void createTask_TaskIsNonValid_ThrowException() {
         CreationTaskRequest first = new CreationTaskRequest(null, "message", 1L);
-        CreationTaskRequest second = new CreationTaskRequest("   ","message", 1L);
+        CreationTaskRequest second = new CreationTaskRequest("   ", "message", 1L);
         CreationTaskRequest third = new CreationTaskRequest("Task name", null, 1L);
         CreationTaskRequest fourth = new CreationTaskRequest("Task name", "  ", 1L);
         CreationTaskRequest fifth = new CreationTaskRequest("Task name", "  ", null);
         CreationTaskRequest sixth = new CreationTaskRequest("Task name", "message", -100L);
         assertAll(
-                () -> assertThrows(IncorrectDataException.class, ()->controller.createTask(first)),
-                () -> assertThrows(IncorrectDataException.class, ()->controller.createTask(second)),
-                () -> assertThrows(IncorrectDataException.class, ()->controller.createTask(third)),
-                () -> assertThrows(IncorrectDataException.class, ()->controller.createTask(fourth)),
-                () -> assertThrows(IncorrectDataException.class, ()->controller.createTask(fifth)),
-                () -> assertThrows(IncorrectDataException.class, ()->controller.createTask(sixth))
+                () -> assertThrows(IncorrectFieldException.class, () -> controller.createTask(first)),
+                () -> assertThrows(IncorrectFieldException.class, () -> controller.createTask(second)),
+                () -> assertThrows(IncorrectFieldException.class, () -> controller.createTask(third)),
+                () -> assertThrows(IncorrectFieldException.class, () -> controller.createTask(fourth)),
+                () -> assertThrows(IncorrectFieldException.class, () -> controller.createTask(fifth)),
+                () -> assertThrows(IncorrectFieldException.class, () -> controller.createTask(sixth))
         );
+    }
 
-
+    @Test
+    void findAll_ReturnValidResponseEntity() {
+        List<TaskDto> taskDtoList = List.of(
+            TaskDto.builder()
+                    .id(1L)
+                    .taskName("Task1")
+                    .message("message")
+                    .status(Status.OPEN)
+                    .dataTimeOfCreation(DateFormatHM.getDateTime())
+                    .userId(1L)
+                    .build(),
+                TaskDto.builder()
+                        .id(2L)
+                        .taskName("Task2")
+                        .message("message")
+                        .status(Status.OPEN)
+                        .dataTimeOfCreation(DateFormatHM.getDateTime())
+                        .userId(1L)
+                        .build()
+        );
+        doReturn(taskDtoList).when(this.taskService).findAll();
+        var response = controller.findAll();
+        assertAll(
+                () -> assertNotNull(response),
+                () -> assertEquals(HttpStatus.OK, response.getStatusCode()),
+                () -> assertEquals(MediaType.APPLICATION_JSON, response.getHeaders().getContentType()),
+                () -> assertEquals(taskDtoList, response.getBody())
+        );
+    }
+    @Test
+    void test(){
+        System.out.println(DateFormatHM.getDateTime());
     }
 }
