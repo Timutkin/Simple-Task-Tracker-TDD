@@ -47,7 +47,7 @@ class TaskControllerTest {
                 .dataTimeOfCreation(LocalDateTime.now())
                 .message("Message")
                 .userId(1L)
-                .status(Status.OPEN)
+                .status("OPEN")
                 .build();
         doReturn(task).when(this.taskService).save(request);
         //when
@@ -55,7 +55,7 @@ class TaskControllerTest {
         //then
         assertAll(
                 () -> assertNotNull(response),
-                () -> assertEquals(HttpStatus.OK, response.getStatusCode()),
+                () -> assertEquals(HttpStatus.CREATED, response.getStatusCode()),
                 () -> assertEquals(MediaType.APPLICATION_JSON, response.getHeaders().getContentType()),
                 () -> assertEquals(task, response.getBody())
         );
@@ -85,7 +85,7 @@ class TaskControllerTest {
                     .id(1L)
                     .taskName("Task1")
                     .message("message")
-                    .status(Status.OPEN)
+                    .status("OPEN")
                     .dataTimeOfCreation(DateFormatHM.getDateTime())
                     .userId(1L)
                     .build(),
@@ -93,7 +93,7 @@ class TaskControllerTest {
                         .id(2L)
                         .taskName("Task2")
                         .message("message")
-                        .status(Status.OPEN)
+                        .status("OPEN")
                         .dataTimeOfCreation(DateFormatHM.getDateTime())
                         .userId(1L)
                         .build()
@@ -107,4 +107,11 @@ class TaskControllerTest {
                 () -> assertEquals(taskDtoList, response.getBody())
         );
     }
+
+
+    @Test
+    void updateTask() {
+
+    }
+
 }

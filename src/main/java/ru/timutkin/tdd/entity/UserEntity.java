@@ -30,6 +30,6 @@ public class UserEntity {
 
     String email;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     DepartmentEntity department;
 }

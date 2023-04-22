@@ -1,7 +1,9 @@
 package ru.timutkin.tdd.service.impl;
 
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.timutkin.tdd.dto.TaskDto;
 import ru.timutkin.tdd.entity.TaskEntity;
@@ -46,11 +48,17 @@ public class TaskServiceImpl implements TaskService {
     }
 
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Override
     public List<TaskDto> findAll(){
         return taskRepository.findAll()
                 .stream()
                 .map(mapper::taskEntityToTaskDto)
                 .toList();
+    }
+
+    @Override
+    public ResponseEntity<TaskDto> update(TaskDto taskDto) {
+        return null;
     }
 }

@@ -5,13 +5,10 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import ru.timutkin.tdd.dto.TaskDto;
@@ -19,6 +16,7 @@ import ru.timutkin.tdd.entity.TaskEntity;
 import ru.timutkin.tdd.entity.UserEntity;
 
 import ru.timutkin.tdd.enumeration.Status;
+import ru.timutkin.tdd.repository.DepartmentRepository;
 import ru.timutkin.tdd.repository.TaskRepository;
 import ru.timutkin.tdd.repository.UserRepository;
 import ru.timutkin.tdd.utils.DateFormatHM;
@@ -45,15 +43,19 @@ class TaskControllerIT {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    DepartmentRepository departmentRepository;
+
     @Test
     void createTask_TaskIsValid_ReturnsValidResponse() throws Exception {
+        departmentRepository.save(UserEntityData.getFirst().getDepartment());
         userRepository.save(UserEntityData.getFirst());
         TaskDto task = TaskDto.builder()
                 .id(1L)
                 .dataTimeOfCreation(DateFormatHM.getDateTime())
                 .taskName("task name")
                 .message("message")
-                .status(Status.OPEN)
+                .status("OPEN")
                 .userId(1L)
                 .build();
         ObjectMapper mapper = new ObjectMapper();
@@ -71,7 +73,7 @@ class TaskControllerIT {
                         """)
                 .accept(MediaType.APPLICATION_JSON)
         ).andExpectAll(
-                status().isOk(),
+                status().isCreated(),
                 content().contentType(MediaType.APPLICATION_JSON),
                 content().json(json)
         );
@@ -98,9 +100,8 @@ class TaskControllerIT {
     @Test
     void findAll_ReturnValidResponseEntity() throws Exception {
         UserEntity userEntity = UserEntityData.getFirst();
+        departmentRepository.save(userEntity.getDepartment());
         userRepository.save(userEntity);
-        System.out.println("--------------------------------------");
-        System.out.println(userRepository.findById(1L).get());
         String dateTime = "2023-04-19 23:52";
         taskRepository.save(
                 TaskEntity.builder()

@@ -35,7 +35,7 @@ public class TaskEntity {
     @Enumerated(EnumType.STRING)
     Status status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     UserEntity user;
 
 

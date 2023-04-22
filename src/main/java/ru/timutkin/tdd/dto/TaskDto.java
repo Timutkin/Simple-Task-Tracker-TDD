@@ -3,18 +3,17 @@ package ru.timutkin.tdd.dto;
 
 import lombok.Builder;
 import lombok.Data;
-import ru.timutkin.tdd.enumeration.Status;
+import ru.timutkin.tdd.web.validation.CreateUpdateTask;
 
 import java.time.LocalDateTime;
 
 @Data
 @Builder
-public class TaskDto {
+public class TaskDto implements CreateUpdateTask {
     Long id;
     LocalDateTime dataTimeOfCreation;
     String taskName;
     String message;
-    Status status;
+    String status;
     Long userId;
-
 }
