@@ -3,12 +3,15 @@ package ru.timutkin.tdd.web.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import ru.timutkin.tdd.dto.TaskDto;
@@ -20,6 +23,7 @@ import ru.timutkin.tdd.repository.TaskRepository;
 import ru.timutkin.tdd.repository.UserRepository;
 import ru.timutkin.tdd.utils.DateFormatHM;
 import ru.timutkin.tdd.web.constant.ApiConstant;
+import ru.timutkin.tdd.web.controller.data.UserEntityData;
 
 
 import java.time.LocalDateTime;
@@ -28,7 +32,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@AutoConfigureMockMvc()
+@AutoConfigureMockMvc
+@Transactional
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class TaskControllerIT {
 
     @Autowired
@@ -39,24 +45,9 @@ class TaskControllerIT {
     @Autowired
     UserRepository userRepository;
 
-    private static final UserEntity user = UserEntity.builder()
-            .email("xXwild.duckXx@yandex.ru")
-            .name("Timofey")
-            .middleName("Sergeevich")
-            .lastName("Utkin")
-            .build();
-
-    @AfterEach
-    @Transactional
-    void tearDown(){
-        taskRepository.deleteById(1L);
-        taskRepository.deleteById(2L);
-        userRepository.deleteById(1L);
-    }
-
     @Test
     void createTask_TaskIsValid_ReturnsValidResponse() throws Exception {
-        userRepository.save(user);
+        userRepository.save(UserEntityData.getFirst());
         TaskDto task = TaskDto.builder()
                 .id(1L)
                 .dataTimeOfCreation(DateFormatHM.getDateTime())
@@ -88,18 +79,6 @@ class TaskControllerIT {
 
     @Test
     void createTask_TaskIsNonValidUserId_ReturnsValidResponse() throws Exception {
-        TaskDto task = TaskDto.builder()
-                .id(1L)
-                .dataTimeOfCreation(DateFormatHM.getDateTime())
-                .taskName("task name")
-                .message("message")
-                .status(Status.OPEN)
-                .userId(1L)
-                .build();
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        String json = mapper.writeValueAsString(task);
         mvc.perform(post(ApiConstant.VERSION_API+"/tasks")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
@@ -118,25 +97,27 @@ class TaskControllerIT {
 
     @Test
     void findAll_ReturnValidResponseEntity() throws Exception {
-        UserEntity userEntity = user;
-        userRepository.saveAndFlush(userEntity);
+        UserEntity userEntity = UserEntityData.getFirst();
+        userRepository.save(userEntity);
+        System.out.println("--------------------------------------");
+        System.out.println(userRepository.findById(1L).get());
         String dateTime = "2023-04-19 23:52";
-        taskRepository.saveAndFlush(
+        taskRepository.save(
                 TaskEntity.builder()
                         .dataTimeOfCreation(LocalDateTime.parse(dateTime,DateFormatHM.formatter))
                         .taskName("task1")
                         .message("message")
                         .status(Status.OPEN)
-                        .user(user)
+                        .user(userEntity)
                         .build()
         );
-        taskRepository.saveAndFlush(
+        taskRepository.save(
                 TaskEntity.builder()
                         .dataTimeOfCreation(LocalDateTime.parse(dateTime,DateFormatHM.formatter))
                         .taskName("task2")
                         .message("message")
                         .status(Status.OPEN)
-                        .user(user)
+                        .user(userEntity)
                         .build()
         );
         mvc.perform(get(ApiConstant.VERSION_API+"/tasks"))

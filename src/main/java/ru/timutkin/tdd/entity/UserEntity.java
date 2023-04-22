@@ -3,6 +3,8 @@ package ru.timutkin.tdd.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,12 +15,11 @@ import lombok.*;
 public class UserEntity {
 
     @Id
-    @SequenceGenerator(allocationSize = 20, name = "task_seq")
+    @SequenceGenerator(allocationSize = 20, name = "user_seq")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
     Long id;
 
     String name;
-
     @Column(name = "last_name")
     String lastName;
 
@@ -26,5 +27,4 @@ public class UserEntity {
     String middleName;
 
     String email;
-
 }

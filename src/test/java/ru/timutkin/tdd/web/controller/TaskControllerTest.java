@@ -107,8 +107,4 @@ class TaskControllerTest {
                 () -> assertEquals(taskDtoList, response.getBody())
         );
     }
-    @Test
-    void test(){
-        System.out.println(DateFormatHM.getDateTime());
-    }
 }
