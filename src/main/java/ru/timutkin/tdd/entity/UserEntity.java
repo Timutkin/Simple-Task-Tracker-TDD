@@ -2,6 +2,7 @@ package ru.timutkin.tdd.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 
@@ -10,6 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "user", schema = "public")
 public class UserEntity {
@@ -27,4 +29,7 @@ public class UserEntity {
     String middleName;
 
     String email;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    DepartmentEntity department;
 }

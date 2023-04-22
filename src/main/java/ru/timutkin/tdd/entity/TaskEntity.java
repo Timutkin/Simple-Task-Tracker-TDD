@@ -4,6 +4,7 @@ package ru.timutkin.tdd.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 import ru.timutkin.tdd.enumeration.Status;
 import ru.timutkin.tdd.utils.DateFormatHM;
 
@@ -16,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "tasks", schema = "public")
 public class TaskEntity {
