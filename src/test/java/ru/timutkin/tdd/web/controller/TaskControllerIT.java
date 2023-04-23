@@ -102,7 +102,7 @@ class TaskControllerIT {
         UserEntity userEntity = UserEntityData.getFirst();
         departmentRepository.save(userEntity.getDepartment());
         userRepository.save(userEntity);
-        String dateTime = "2023-04-19 23:52";
+        String dateTime = "2023-04-19T23:52";
         taskRepository.save(
                 TaskEntity.builder()
                         .dataTimeOfCreation(LocalDateTime.parse(dateTime,DateFormatHM.formatter))

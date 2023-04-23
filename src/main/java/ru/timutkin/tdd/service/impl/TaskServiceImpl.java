@@ -58,7 +58,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public ResponseEntity<TaskDto> update(TaskDto taskDto) {
+    public TaskDto update(TaskDto taskDto) {
         return null;
     }
 }

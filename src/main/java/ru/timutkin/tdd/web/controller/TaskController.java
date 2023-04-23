@@ -35,7 +35,10 @@ public class TaskController {
     @PutMapping
     public ResponseEntity<TaskDto> updateTask(@RequestBody TaskDto taskDto){
         TaskControllerValidation.validateUpdate(taskDto);
-        return taskService.update(taskDto);
+        TaskDto updatedTaskDto = taskService.update(taskDto);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(updatedTaskDto);
     }
 
 

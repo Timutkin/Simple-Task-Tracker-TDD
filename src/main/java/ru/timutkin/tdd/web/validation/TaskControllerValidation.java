@@ -22,7 +22,7 @@ public class TaskControllerValidation {
         if (taskDto.getDataTimeOfCreation() != null && !DataValidation.validate(taskDto.getDataTimeOfCreation())){
             String message = "Correct format: yyyy-MM-dd HH:mm";
             throw new IncorrectFieldException(
-                    getApiValidationError(taskDto, message, "id", taskDto.getId())
+                    getApiValidationError(taskDto, message, "dataTimeOfCreation", taskDto.getDataTimeOfCreation())
             );
         }
         if (taskDto.getTaskName() != null && taskDto.getTaskName().isBlank()) {
@@ -38,8 +38,10 @@ public class TaskControllerValidation {
             );
         }
         String status = taskDto.getStatus();
-        if (status != null && (status.equals(Status.OPEN.toString()) || status.equals(Status.IN_PROGRESS.toString()) ||
-                status.equals(Status.REOPENED.toString()) || status.equals(Status.RESOLVED.toString()) || status.equals(Status.CLOSED.toString())
+        if (status != null &&
+                (!status.equals(Status.OPEN.toString()) && !status.equals(Status.IN_PROGRESS.toString()) &&
+               ! status.equals(Status.REOPENED.toString()) && !status.equals(Status.RESOLVED.toString()) &&
+                !status.equals(Status.CLOSED.toString())
         )) {
             String message = "Acceptable values: OPEN, IN_PROGRESS, RESOLVED, REOPENED, CLOSED";
             throw new IncorrectFieldException(

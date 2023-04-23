@@ -8,13 +8,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import ru.timutkin.tdd.dto.TaskDto;
-import ru.timutkin.tdd.enumeration.Status;
 import ru.timutkin.tdd.exception.IncorrectFieldException;
 import ru.timutkin.tdd.service.TaskService;
-import ru.timutkin.tdd.utils.DateFormatHM;
+import ru.timutkin.tdd.web.controller.data.TaskDtoData;
 import ru.timutkin.tdd.web.request.CreationTaskRequest;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,7 +30,6 @@ class TaskControllerTest {
 
     @Test
     void createTask_TaskIsValid_ReturnsValidResponse() {
-
         // given
         CreationTaskRequest request = CreationTaskRequest
                 .builder()
@@ -40,15 +37,7 @@ class TaskControllerTest {
                 .message("Message")
                 .userId(1L)
                 .build();
-        TaskDto task = TaskDto
-                .builder()
-                .id(1L)
-                .taskName("API - POST : /api/v1/users")
-                .dataTimeOfCreation(LocalDateTime.now())
-                .message("Message")
-                .userId(1L)
-                .status("OPEN")
-                .build();
+        TaskDto task = TaskDtoData.getFirstValidTaskDto();
         doReturn(task).when(this.taskService).save(request);
         //when
         var response = controller.createTask(request);
@@ -60,6 +49,7 @@ class TaskControllerTest {
                 () -> assertEquals(task, response.getBody())
         );
     }
+
     @Test
     void createTask_TaskIsNonValid_ThrowException() {
         CreationTaskRequest first = new CreationTaskRequest(null, "message", 1L);
@@ -80,24 +70,7 @@ class TaskControllerTest {
 
     @Test
     void findAll_ReturnValidResponseEntity() {
-        List<TaskDto> taskDtoList = List.of(
-            TaskDto.builder()
-                    .id(1L)
-                    .taskName("Task1")
-                    .message("message")
-                    .status("OPEN")
-                    .dataTimeOfCreation(DateFormatHM.getDateTime())
-                    .userId(1L)
-                    .build(),
-                TaskDto.builder()
-                        .id(2L)
-                        .taskName("Task2")
-                        .message("message")
-                        .status("OPEN")
-                        .dataTimeOfCreation(DateFormatHM.getDateTime())
-                        .userId(1L)
-                        .build()
-        );
+        List<TaskDto> taskDtoList = TaskDtoData.getValidListTaskDto();
         doReturn(taskDtoList).when(this.taskService).findAll();
         var response = controller.findAll();
         assertAll(
@@ -110,8 +83,32 @@ class TaskControllerTest {
 
 
     @Test
-    void updateTask() {
-
+    void updateTask_TaskIsNonValid_ThrowsException() {
+        List<TaskDto> nonValidTaskDto = TaskDtoData.getNonValidListTaskDto();
+        for (TaskDto dto : nonValidTaskDto) {
+            assertThrows(IncorrectFieldException.class, () -> controller.updateTask(dto));
+        }
     }
+
+    @Test
+    void updateTask_TaskIsValid_ReturnsValidResponseEntity() {
+        TaskDto taskDtoUpdateRequest = TaskDto.builder()
+                .id(1L)
+                .status("CLOSED")
+                .userId(2L)
+                .build();
+        TaskDto updatedTaskDto = TaskDtoData.getFirstValidTaskDto();
+        updatedTaskDto.setStatus("CLOSED");
+        updatedTaskDto.setUserId(2L);
+        doReturn(updatedTaskDto).when(this.taskService).update(taskDtoUpdateRequest);
+        var response = controller.updateTask(taskDtoUpdateRequest);
+        assertAll(
+                () -> assertNotNull(response),
+                () -> assertEquals(HttpStatus.OK, response.getStatusCode()),
+                () -> assertEquals(MediaType.APPLICATION_JSON, response.getHeaders().getContentType()),
+                () -> assertEquals(updatedTaskDto, response.getBody())
+        );
+    }
+
 
 }

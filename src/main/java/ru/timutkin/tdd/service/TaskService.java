@@ -11,5 +11,5 @@ public interface TaskService {
 
     List<TaskDto> findAll();
 
-    ResponseEntity<TaskDto> update(TaskDto taskDto);
+    TaskDto update(TaskDto taskDto);
 }
