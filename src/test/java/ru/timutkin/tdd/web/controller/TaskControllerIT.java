@@ -3,6 +3,7 @@ package ru.timutkin.tdd.web.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -21,6 +22,7 @@ import ru.timutkin.tdd.repository.TaskRepository;
 import ru.timutkin.tdd.repository.UserRepository;
 import ru.timutkin.tdd.utils.DateFormatHM;
 import ru.timutkin.tdd.web.constant.ApiConstant;
+import ru.timutkin.tdd.web.controller.data.TaskDtoData;
 import ru.timutkin.tdd.web.controller.data.UserEntityData;
 
 
@@ -45,6 +47,7 @@ class TaskControllerIT {
 
     @Autowired
     DepartmentRepository departmentRepository;
+
 
     @Test
     void createTask_TaskIsValid_ReturnsValidResponse() throws Exception {
@@ -144,6 +147,53 @@ class TaskControllerIT {
                                     "userId": 1
                                 }
                             ]
+                             """
+                        )
+                );
+    }
+
+    @Test
+    void updateTask_TaskIsValid_ReturnsValidResponseEntity() throws Exception{
+        UserEntity firstUserEntity = UserEntityData.getFirst();
+        UserEntity secondUserEntity = UserEntityData.getListOfUserEntity().get(1);
+        departmentRepository.save(firstUserEntity.getDepartment());
+        userRepository.save(firstUserEntity);
+        userRepository.save(secondUserEntity);
+        String dateTime = "2023-04-19T23:52";
+        taskRepository.save(
+                TaskEntity.builder()
+                        .dataTimeOfCreation(LocalDateTime.parse(dateTime,DateFormatHM.formatter))
+                        .taskName("task1")
+                        .message("message")
+                        .status(Status.OPEN)
+                        .user(firstUserEntity)
+                        .build()
+        );
+        mvc.perform(put(ApiConstant.VERSION_API+"/tasks")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {   
+                            "id", 1
+                            "taskName":"new task",
+                            "message": "new message",
+                            "dataTimeOfCreation": "2023-04-23T14:51",
+                            "status":"CLOSED",
+                            "userId": 2
+                        }
+                        """)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpectAll(
+                        status().isOk(),
+                        content().contentType(MediaType.APPLICATION_JSON),
+                        content().json("""
+                                {
+                                    "id": 1,
+                                    "dataTimeOfCreation":"2023-04-23T14:51:00",
+                                    "taskName":"new task",
+                                    "message": "new message",
+                                    "status": "CLOSED",
+                                    "userId": 1
+                                }
                              """
                         )
                 );
