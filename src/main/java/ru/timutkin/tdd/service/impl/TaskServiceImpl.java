@@ -1,12 +1,13 @@
 package ru.timutkin.tdd.service.impl;
 
 import lombok.AllArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.timutkin.tdd.dto.TaskDto;
 import ru.timutkin.tdd.entity.TaskEntity;
+import ru.timutkin.tdd.entity.UserEntity;
+import ru.timutkin.tdd.exception.TaskNotFoundException;
 import ru.timutkin.tdd.exception.UserNotFoundException;
 import ru.timutkin.tdd.mapper.TaskMapper;
 import ru.timutkin.tdd.repository.TaskRepository;
@@ -26,7 +27,7 @@ public class TaskServiceImpl implements TaskService {
 
     private final UserRepository userRepository;
 
-    private final TaskMapper mapper;
+    private final TaskMapper taskMapper;
 
     @Override
     @Transactional
@@ -34,31 +35,44 @@ public class TaskServiceImpl implements TaskService {
         TaskEntity taskEntity = new TaskEntity(taskRequest.getTaskName(), taskRequest.getMessage());
         taskEntity.setUser(
                 userRepository.findById(taskRequest.getUserId()).orElseThrow(
-                        ()-> new UserNotFoundException(
-                                ApiValidationError.builder()
-                                        .object(taskRequest.getClass().getSimpleName())
-                                        .field("userID")
-                                        .rejectedValue(taskRequest.getUserId())
-                                        .message("User with id = " + taskRequest.getUserId() + " not found")
-                                        .build())
-                        )
-        );
+                        () -> new UserNotFoundException(
+                                ApiValidationError.getApiValidationError(taskRequest,
+                                        "User with id = " + taskRequest.getUserId() + " not found",
+                                        "userID", taskRequest.getUserId())
+                        )));
         taskRepository.saveAndFlush(taskEntity);
-        return mapper.taskEntityToTaskDto(taskEntity);
+        return taskMapper.taskEntityToTaskDto(taskEntity);
     }
 
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Override
-    public List<TaskDto> findAll(){
+    public List<TaskDto> findAll() {
         return taskRepository.findAll()
                 .stream()
-                .map(mapper::taskEntityToTaskDto)
+                .map(taskMapper::taskEntityToTaskDto)
                 .toList();
     }
 
     @Override
     public TaskDto update(TaskDto taskDto) {
-        return null;
+        TaskEntity task = taskRepository.findById(taskDto.getId()).orElseThrow(
+                () -> new TaskNotFoundException(
+                        ApiValidationError.getApiValidationError(taskDto,
+                                "Task with id = " + taskDto.getId() + " not found",
+                                "id", taskDto.getId())
+                )
+        );
+        UserEntity newUser = userRepository.findById(taskDto.getUserId()).orElseThrow(
+                () -> new UserNotFoundException(
+                        ApiValidationError.getApiValidationError(taskDto,
+                                "User with id = " + taskDto.getUserId() + " not found",
+                                "userID", taskDto.getUserId()))
+        );
+        taskMapper.updateTaskEntityFromTaskDto(taskDto,task);
+        task.setUser(newUser);
+        taskRepository.saveAndFlush(task);
+        return taskMapper.taskEntityToTaskDto(task);
     }
+
 }

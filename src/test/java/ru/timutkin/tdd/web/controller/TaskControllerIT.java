@@ -173,7 +173,7 @@ class TaskControllerIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {   
-                            "id", 1
+                            "id":1,
                             "taskName":"new task",
                             "message": "new message",
                             "dataTimeOfCreation": "2023-04-23T14:51",
@@ -192,7 +192,7 @@ class TaskControllerIT {
                                     "taskName":"new task",
                                     "message": "new message",
                                     "status": "CLOSED",
-                                    "userId": 1
+                                    "userId": 2
                                 }
                              """
                         )

@@ -26,14 +26,14 @@ public class UserEntityData {
         Collections.addAll(userEntityList,
                 UserEntity.builder()
                 .email("xXwild.duckXx@yandex.ru")
-                .name("Timofey")
+                .firstName("Timofey")
                 .middleName("Sergeevich")
                 .department(department)
                 .lastName("Utkin")
                 .build(),
                 UserEntity.builder()
                 .email("goslingjava@coolman.com")
-                .name("James")
+                .firstName("James")
                 .middleName("Arthur")
                 .lastName("Gosling")
                 .department(department)
