@@ -57,7 +57,7 @@ class TaskControllerTest {
     }
 
     @Test
-    void createTask_TaskIsNonValid_ThrowException() {
+    void createTask_TaskIsNonValid_ThrowsIncorrectFieldException() {
         CreationTaskRequest first = new CreationTaskRequest(null, "message", 1L);
         CreationTaskRequest second = new CreationTaskRequest("   ", "message", 1L);
         CreationTaskRequest third = new CreationTaskRequest("Task name", null, 1L);
@@ -89,7 +89,7 @@ class TaskControllerTest {
 
 
     @Test
-    void updateTask_TaskIsNonValid_ThrowsException() {
+    void updateTask_TaskIsNonValid_ThrowsIncorrectFieldException() {
         List<TaskDto> nonValidTaskDto = TaskDtoData.getNonValidListTaskDto();
         for (TaskDto dto : nonValidTaskDto) {
             assertThrows(IncorrectFieldException.class, () -> controller.updateTask(dto));
@@ -133,7 +133,7 @@ class TaskControllerTest {
     @ParameterizedTest
     @ValueSource(longs = {0L, -1L, -3L})
     @NullSource
-    void deleteById_TaskIdIsNonValid_ReturnsValidResponseEntity(Long taskId) {
+    void deleteById_TaskIdIsNonValid_ThrowsIncorrectPathVariableException(Long taskId) {
         assertThrows(IncorrectPathVariableException.class, ()->controller.deleteById(taskId));
     }
 }
