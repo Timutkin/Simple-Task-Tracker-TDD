@@ -56,7 +56,7 @@ public class TaskControllerValidation {
         }
     }
 
-    public static void validate(CreationTaskRequest request) throws IncorrectFieldException{
+    public static void validateCreate(CreationTaskRequest request) throws IncorrectFieldException{
 
         if (request.getTaskName() == null || request.getTaskName().isBlank()) {
             String message = "The task name should not be empty, consist of spaces or be null";
@@ -76,7 +76,6 @@ public class TaskControllerValidation {
                     getApiValidationError(request, message, "userId", request.getUserId())
             );
         }
-
     }
 
 }

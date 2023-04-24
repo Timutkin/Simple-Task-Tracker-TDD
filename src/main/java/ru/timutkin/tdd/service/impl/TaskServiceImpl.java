@@ -75,4 +75,9 @@ public class TaskServiceImpl implements TaskService {
         return taskMapper.taskEntityToTaskDto(task);
     }
 
+    @Override
+    public void deleteById(Long taskId) {
+
+    }
+
 }

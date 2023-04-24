@@ -2,13 +2,19 @@ package ru.timutkin.tdd.web.controller;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import ru.timutkin.tdd.dto.TaskDto;
 import ru.timutkin.tdd.exception.IncorrectFieldException;
+import ru.timutkin.tdd.exception.IncorrectPathVariableException;
 import ru.timutkin.tdd.service.TaskService;
 import ru.timutkin.tdd.web.controller.data.TaskDtoData;
 import ru.timutkin.tdd.web.request.CreationTaskRequest;
@@ -110,5 +116,24 @@ class TaskControllerTest {
         );
     }
 
+    @Test
+    void deleteById_TaskIdIsValid_ReturnsValidResponseEntity() {
+        Long taskId = 1L;
+        var response = controller.deleteById(taskId);
+        assertAll(
+                () -> assertNotNull(response),
+                () -> assertEquals(HttpStatus.OK, response.getStatusCode()),
+                () -> assertEquals(MediaType.APPLICATION_JSON, response.getHeaders().getContentType()),
+                () -> assertEquals(taskId, response.getBody())
+        );
+        Mockito.verify(this.taskService, Mockito.times(1)).deleteById(taskId);
+    }
 
+
+    @ParameterizedTest
+    @ValueSource(longs = {0L, -1L, -3L})
+    @NullSource
+    void deleteById_TaskIdIsNonValid_ReturnsValidResponseEntity(Long taskId) {
+        assertThrows(IncorrectPathVariableException.class, ()->controller.deleteById(taskId));
+    }
 }
