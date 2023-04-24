@@ -21,7 +21,7 @@ public class TaskDtoData {
         Collections.addAll(nonValidTaskDto,
                 TaskDto.builder().id(1L).build(),
                 TaskDto.builder().id(0L).build(),
-                TaskDto.builder().id(1L).dataTimeOfCreation(LocalDateTime.now()).build(),
+                TaskDto.builder().id(1L).dataTimeOfCreation(DateFormatHM.getDateTime()).build(),
                 TaskDto.builder().id(1L).taskName(" ").build(),
                 TaskDto.builder().id(1L).message(" ").build(),
                 TaskDto.builder().id(1L).status("OpEn").build(),
@@ -31,7 +31,7 @@ public class TaskDtoData {
                 TaskDto.builder()
                         .id(1L)
                         .taskName("API - POST : /api/v1/users")
-                        .dataTimeOfCreation(LocalDateTime.now())
+                        .dataTimeOfCreation(DateFormatHM.getDateTime())
                         .message("Message")
                         .userId(1L)
                         .status("OPEN")
