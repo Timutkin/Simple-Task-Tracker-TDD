@@ -5,6 +5,8 @@ import ru.timutkin.tdd.dto.TaskDto;
 import ru.timutkin.tdd.enumeration.Status;
 import ru.timutkin.tdd.exception.IncorrectFieldException;
 
+import ru.timutkin.tdd.exception.IncorrectPathVariableException;
+import ru.timutkin.tdd.web.handler.ApiValidationError;
 import ru.timutkin.tdd.web.request.CreationTaskRequest;
 
 import static ru.timutkin.tdd.web.handler.ApiValidationError.*;
@@ -75,6 +77,16 @@ public class TaskControllerValidation {
             throw new IncorrectFieldException(
                     getApiValidationError(request, message, "userId", request.getUserId())
             );
+        }
+    }
+
+    public static void validatePathVariableId(Long id){
+        if (id == null || id <=0){
+            throw new IncorrectPathVariableException(ApiValidationError.builder()
+                    .rejectedValue(id)
+                    .message("The id should not be null or <= 0")
+                    .field("/{taskId}")
+                    .build());
         }
     }
 

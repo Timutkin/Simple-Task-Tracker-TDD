@@ -1,5 +1,6 @@
 package ru.timutkin.tdd.web.controller;
 
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -7,9 +8,7 @@ import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import ru.timutkin.tdd.dto.TaskDto;
@@ -126,7 +125,7 @@ class TaskControllerTest {
                 () -> assertEquals(MediaType.APPLICATION_JSON, response.getHeaders().getContentType()),
                 () -> assertEquals(taskId, response.getBody())
         );
-        Mockito.verify(this.taskService, Mockito.times(1)).deleteById(taskId);
+        verify(this.taskService, times(1)).deleteById(taskId);
     }
 
 
@@ -136,4 +135,26 @@ class TaskControllerTest {
     void deleteById_TaskIdIsNonValid_ThrowsIncorrectPathVariableException(Long taskId) {
         assertThrows(IncorrectPathVariableException.class, ()->controller.deleteById(taskId));
     }
+
+    @Test
+    void findById_TaskIdIsValid_ReturnsValidResponseEntity() {
+        when(this.taskService.findById(anyLong())).thenReturn(TaskDtoData.getFirstValidTaskDto());
+        var response = controller.findById(1L);
+        assertAll(
+                () -> assertNotNull(response),
+                () -> assertEquals(HttpStatus.OK, response.getStatusCode()),
+                () -> assertEquals(MediaType.APPLICATION_JSON, response.getHeaders().getContentType()),
+                () -> assertEquals(TaskDtoData.getFirstValidTaskDto(), response.getBody())
+        );
+    }
+
+    @ParameterizedTest()
+    @ValueSource(longs = {0L, -1L, -3L})
+    @NullSource
+    void findById_TaskIdIsNonValid_ThrowsException(Long taskId) {
+        assertThrows(IncorrectPathVariableException.class, ()->controller.deleteById(taskId));
+    }
+
+
+
 }

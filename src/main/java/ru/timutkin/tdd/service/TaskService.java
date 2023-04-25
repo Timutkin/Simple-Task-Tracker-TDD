@@ -14,4 +14,6 @@ public interface TaskService {
     TaskDto update(TaskDto taskDto);
 
     void deleteById(Long taskId);
+
+    TaskDto findById(Long taskId);
 }

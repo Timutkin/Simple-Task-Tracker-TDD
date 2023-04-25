@@ -6,11 +6,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.timutkin.tdd.dto.TaskDto;
-import ru.timutkin.tdd.exception.IncorrectFieldException;
-import ru.timutkin.tdd.exception.IncorrectPathVariableException;
 import ru.timutkin.tdd.service.TaskService;
 import ru.timutkin.tdd.web.constant.ApiConstant;
-import ru.timutkin.tdd.web.handler.ApiValidationError;
 import ru.timutkin.tdd.web.request.CreationTaskRequest;
 import ru.timutkin.tdd.web.validation.TaskControllerValidation;
 
@@ -53,15 +50,18 @@ public class TaskController {
                 .body(taskDtoList);
     }
 
+    @GetMapping("/{taskId}")
+    public ResponseEntity<TaskDto> findById(@PathVariable Long taskId){
+        TaskControllerValidation.validatePathVariableId(taskId);
+        TaskDto task = taskService.findById(taskId);
+        return  ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(task);
+    }
+
     @DeleteMapping("/{taskId}")
     public ResponseEntity<Long> deleteById(@PathVariable(required = false) Long taskId){
-        if (taskId == null || taskId <=0){
-            throw new IncorrectPathVariableException(ApiValidationError.builder()
-                    .rejectedValue(taskId)
-                    .message("The id should not be null or <= 0")
-                    .field("/{taskId}")
-                    .build());
-        }
+        TaskControllerValidation.validatePathVariableId(taskId);
         taskService.deleteById(taskId);
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)

@@ -56,6 +56,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional
     public TaskDto update(TaskDto taskDto) {
         TaskEntity task = taskRepository.findById(taskDto.getId()).orElseThrow(
                 () -> new TaskNotFoundException(
@@ -70,7 +71,7 @@ public class TaskServiceImpl implements TaskService {
                                 "User with id = " + taskDto.getUserId() + " not found",
                                 "userID", taskDto.getUserId()))
         );
-        taskMapper.updateTaskEntityFromTaskDto(taskDto,task);
+        taskMapper.updateTaskEntityFromTaskDto(taskDto, task);
         task.setUser(newUser);
         taskRepository.saveAndFlush(task);
         return taskMapper.taskEntityToTaskDto(task);
@@ -81,13 +82,27 @@ public class TaskServiceImpl implements TaskService {
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void deleteById(Long taskId) {
         TaskEntity task = taskRepository.findById(taskId).orElseThrow(
-                () -> new UserNotFoundException(ApiValidationError.builder()
+                () -> new TaskNotFoundException(ApiValidationError.builder()
                         .rejectedValue(taskId)
-                        .message("Task with id = " + taskId + "not found")
+                        .message("Task with id = " + taskId + " not found")
                         .field("/{taskId}")
                         .build())
         );
         taskRepository.deleteById(task.getId());
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public TaskDto findById(Long taskId) {
+        return taskMapper.taskEntityToTaskDto(
+                taskRepository.findById(taskId).orElseThrow(
+                        () -> new TaskNotFoundException(ApiValidationError.builder()
+                                .rejectedValue(taskId)
+                                .message("Task with id = " + taskId + " not found")
+                                .field("/{taskId}")
+                                .build())
+                )
+        );
     }
 
 }

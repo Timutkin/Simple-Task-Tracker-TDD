@@ -53,6 +53,7 @@ class TaskControllerIT {
         UserEntity user = UserEntityData.getFirstUserEntity();
         userRepository.save(user);
         TaskDto task = TaskDtoData.getFirstValidTaskDto();
+        task.setUserId(user.getId());
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -96,13 +97,10 @@ class TaskControllerIT {
     void findAll_ReturnValidResponseEntity() throws Exception {
         UserEntity userEntity = UserEntityData.getFirstUserEntity();
         userRepository.save(userEntity);
-        String dateTime = "2023-04-19T23:52";
         TaskEntity first = TaskEntityData.getFirstValidTaskEntity();
         TaskEntity second = TaskEntityData.getValidTaskEntityList().get(1);
         first.setUser(userEntity);
-        first.setDataTimeOfCreation(LocalDateTime.parse(dateTime, DateFormatHM.formatter));
         second.setUser(userEntity);
-        second.setDataTimeOfCreation(LocalDateTime.parse(dateTime, DateFormatHM.formatter));
         taskRepository.save(first);
         taskRepository.save(second);
         mvc.perform(get(ApiConstant.VERSION_API + "/tasks"))
@@ -113,7 +111,7 @@ class TaskControllerIT {
                                 [
                                     {
                                         "id": 1,
-                                        "dataTimeOfCreation":"2023-04-19T23:52:00",
+                                        "dataTimeOfCreation":"2023-03-03T00:00:00",
                                         "taskName":"task1",
                                         "message": "message",
                                         "status": "OPEN",
@@ -121,7 +119,7 @@ class TaskControllerIT {
                                     },
                                     {
                                         "id": 2,
-                                        "dataTimeOfCreation":"2023-04-19T23:52:00",
+                                        "dataTimeOfCreation":"2023-03-03T00:00:00",
                                         "taskName":"task2",
                                         "message": "message",
                                         "status": "OPEN",
@@ -139,9 +137,7 @@ class TaskControllerIT {
         UserEntity secondUserEntity = UserEntityData.getListOfUserEntity().get(1);
         userRepository.save(firstUserEntity);
         userRepository.save(secondUserEntity);
-        String dateTime = "2023-04-19T23:52";
         TaskEntity first = TaskEntityData.getFirstValidTaskEntity();
-        first.setDataTimeOfCreation(LocalDateTime.parse(dateTime, DateFormatHM.formatter));
         first.setUser(firstUserEntity);
         taskRepository.save(first);
         mvc.perform(put(ApiConstant.VERSION_API + "/tasks")
@@ -151,7 +147,7 @@ class TaskControllerIT {
                                     "id":1,
                                     "taskName":"new task",
                                     "message": "new message",
-                                    "dataTimeOfCreation": "2023-04-23T14:51",
+                                    "dataTimeOfCreation": "2023-03-03T00:00",
                                     "status":"CLOSED",
                                     "userId": 2
                                 }
@@ -163,7 +159,7 @@ class TaskControllerIT {
                         content().json("""
                                    {
                                        "id": 1,
-                                       "dataTimeOfCreation":"2023-04-23T14:51:00",
+                                       "dataTimeOfCreation":"2023-03-03T00:00:00",
                                        "taskName":"new task",
                                        "message": "new message",
                                        "status": "CLOSED",
@@ -182,7 +178,7 @@ class TaskControllerIT {
                                 {   
                                     "taskName":"new task",
                                     "message": "new message",
-                                    "dataTimeOfCreation": "2023-04-23T14:51",
+                                    "dataTimeOfCreation": "2023-03-03T00:00",
                                     "status":"CLOSED",
                                     "userId": 2
                                 }
@@ -195,16 +191,16 @@ class TaskControllerIT {
     }
 
     @Test
-    void deleteById_TaskIdIsValid_ReturnsValidResponseEntity() throws Exception{
+    void deleteById_TaskIdIsValid_ReturnsValidResponseEntity() throws Exception {
         UserEntity user = UserEntityData.getFirstUserEntity();
         userRepository.save(user);
         TaskEntity task = TaskEntityData.getFirstValidTaskEntity();
         task.setUser(user);
         taskRepository.save(task);
         Long taskId = task.getId();
-        mvc.perform(delete(ApiConstant.VERSION_API+"/tasks/{taskID}", taskId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+        mvc.perform(delete(ApiConstant.VERSION_API + "/tasks/{taskID}", taskId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpectAll(
                         status().isOk(),
                         content().contentType(MediaType.APPLICATION_JSON),
@@ -213,9 +209,9 @@ class TaskControllerIT {
     }
 
     @Test
-    void deleteById_TaskIdIsValid_ReturnsBadRequest() throws Exception{
+    void deleteById_TaskIdIsNonValid_ReturnsBadRequest() throws Exception {
         Long taskId = 1L;
-        mvc.perform(delete(ApiConstant.VERSION_API+"/tasks/{taskID}", taskId)
+        mvc.perform(delete(ApiConstant.VERSION_API + "/tasks/{taskID}", taskId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpectAll(
@@ -224,4 +220,41 @@ class TaskControllerIT {
                 );
     }
 
+    @Test
+    void findById_TaskIdIsValid_ReturnsValidResponseEntity() throws Exception {
+        userRepository.save(UserEntityData.getFirstUserEntity());
+        TaskEntity task = TaskEntityData.getFirstValidTaskEntity();
+        task.setUser(UserEntityData.getFirstUserEntity());
+        taskRepository.save(task);
+        mvc.perform(get(ApiConstant.VERSION_API + "/tasks/{taskId}", task.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpectAll(
+                        status().isOk(),
+                        content().contentType(MediaType.APPLICATION_JSON),
+                        content().json("""
+                                {
+                                   "id": 1,
+                                   "dataTimeOfCreation":"2023-03-03T00:00:00",
+                                   "taskName":"task1",
+                                   "message": "message",
+                                   "status": "OPEN",
+                                   "userId": 1
+                                }
+                                """)
+
+                );
+    }
+
+    @Test
+    void findById_TaskIdIsNonValid_ReturnsValidResponseEntity() throws Exception {
+        Long taskId = 1L;
+        mvc.perform(get(ApiConstant.VERSION_API + "/tasks/{taskId}", taskId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpectAll(
+                        status().isBadRequest(),
+                        content().contentType(MediaType.APPLICATION_JSON)
+                );
+    }
 }
