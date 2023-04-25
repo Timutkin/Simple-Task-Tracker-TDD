@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 public class DateFormatHM {
 
     public static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm");
+    public static final LocalDateTime allTime = LocalDateTime.parse("2023-03-03T00:00", DateFormatHM.formatter);
 
     public static LocalDateTime getDateTime() {
         LocalDateTime now = LocalDateTime.now();

@@ -18,14 +18,14 @@ public class TaskEntityData {
     static {
         Collections.addAll(validTaskEntityList,
                 TaskEntity.builder()
-                        .dataTimeOfCreation(DateFormatHM.getDateTime())
+                        .dataTimeOfCreation(DateFormatHM.allTime)
                         .taskName("task1")
                         .message("message")
                         .status(Status.OPEN)
                         .build()
                 ,
                 TaskEntity.builder()
-                        .dataTimeOfCreation(DateFormatHM.getDateTime())
+                        .dataTimeOfCreation(DateFormatHM.allTime)
                         .taskName("task2")
                         .message("message")
                         .status(Status.OPEN)
@@ -38,7 +38,7 @@ public class TaskEntityData {
         return validTaskEntityList;
     }
 
-    public TaskEntity getFirstValidTaskEntity(){
+    public TaskEntity   getFirstValidTaskEntity(){
         return validTaskEntityList.get(0);
     }
 }
