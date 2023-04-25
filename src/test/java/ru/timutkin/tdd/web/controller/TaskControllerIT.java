@@ -75,7 +75,7 @@ class TaskControllerIT {
     }
 
     @Test
-    void createTask_TaskIsNonValidUserId_ReturnsValidResponse() throws Exception {
+    void createTask_TaskIsNonValidUserId_ReturnsBadRequest() throws Exception {
         mvc.perform(post(ApiConstant.VERSION_API + "/tasks")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
@@ -100,9 +100,9 @@ class TaskControllerIT {
         TaskEntity first = TaskEntityData.getFirstValidTaskEntity();
         TaskEntity second = TaskEntityData.getValidTaskEntityList().get(1);
         first.setUser(userEntity);
-        first.setDataTimeOfCreation(LocalDateTime.parse(dateTime,DateFormatHM.formatter));
+        first.setDataTimeOfCreation(LocalDateTime.parse(dateTime, DateFormatHM.formatter));
         second.setUser(userEntity);
-        second.setDataTimeOfCreation(LocalDateTime.parse(dateTime,DateFormatHM.formatter));
+        second.setDataTimeOfCreation(LocalDateTime.parse(dateTime, DateFormatHM.formatter));
         taskRepository.save(first);
         taskRepository.save(second);
         mvc.perform(get(ApiConstant.VERSION_API + "/tasks"))
@@ -193,4 +193,35 @@ class TaskControllerIT {
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
     }
+
+    @Test
+    void deleteById_TaskIdIsValid_ReturnsValidResponseEntity() throws Exception{
+        UserEntity user = UserEntityData.getFirstUserEntity();
+        userRepository.save(user);
+        TaskEntity task = TaskEntityData.getFirstValidTaskEntity();
+        task.setUser(user);
+        taskRepository.save(task);
+        Long taskId = task.getId();
+        mvc.perform(delete(ApiConstant.VERSION_API+"/tasks/{taskID}", taskId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpectAll(
+                        status().isOk(),
+                        content().contentType(MediaType.APPLICATION_JSON),
+                        content().json(String.valueOf(taskId))
+                );
+    }
+
+    @Test
+    void deleteById_TaskIdIsValid_ReturnsBadRequest() throws Exception{
+        Long taskId = 1L;
+        mvc.perform(delete(ApiConstant.VERSION_API+"/tasks/{taskID}", taskId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpectAll(
+                        status().isBadRequest(),
+                        content().contentType(MediaType.APPLICATION_JSON)
+                );
+    }
+
 }

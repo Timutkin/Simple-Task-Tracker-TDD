@@ -1,6 +1,7 @@
 package ru.timutkin.tdd.service.impl;
 
 import lombok.AllArgsConstructor;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,8 +77,17 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Retryable(maxAttempts = 2)
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void deleteById(Long taskId) {
-
+        TaskEntity task = taskRepository.findById(taskId).orElseThrow(
+                () -> new UserNotFoundException(ApiValidationError.builder()
+                        .rejectedValue(taskId)
+                        .message("Task with id = " + taskId + "not found")
+                        .field("/{taskId}")
+                        .build())
+        );
+        taskRepository.deleteById(task.getId());
     }
 
 }
