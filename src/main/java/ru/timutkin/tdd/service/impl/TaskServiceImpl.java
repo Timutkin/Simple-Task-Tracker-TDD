@@ -1,6 +1,7 @@
 package ru.timutkin.tdd.service.impl;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -13,11 +14,14 @@ import ru.timutkin.tdd.exception.UserNotFoundException;
 import ru.timutkin.tdd.mapper.TaskMapper;
 import ru.timutkin.tdd.repository.TaskRepository;
 import ru.timutkin.tdd.repository.UserRepository;
+import ru.timutkin.tdd.repository.specifiction.TaskSpecification;
 import ru.timutkin.tdd.service.TaskService;
 import ru.timutkin.tdd.web.handler.ApiValidationError;
 import ru.timutkin.tdd.web.request.CreationTaskRequest;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 
 @AllArgsConstructor
@@ -103,6 +107,15 @@ public class TaskServiceImpl implements TaskService {
                                 .build())
                 )
         );
+    }
+
+    @Override
+    public List<TaskDto> findByParam(Optional<LocalDateTime> after, Optional<LocalDateTime> before,
+                                     Optional<String> taskName, Optional<String> message,
+                                     Optional<String> status, Optional<Long> userId) {
+        return taskRepository.findAll(
+                Specification.where(TaskSpecification.filterTasks(after, before, taskName, message, status, userId))
+        ).stream().map(taskMapper::taskEntityToTaskDto).toList();
     }
 
 }
