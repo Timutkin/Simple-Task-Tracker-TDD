@@ -11,7 +11,7 @@ import java.util.List;
 @ControllerAdvice
 public class ApiExceptionHandler {
 
-    @ExceptionHandler(value = {IncorrectFieldException.class, IncorrectPathVariableException.class})
+    @ExceptionHandler(value = {IncorrectFieldException.class, IncorrectPathVariableException.class, IncorrectRequestParamException.class})
     protected ResponseEntity<ApiError> handleValidationException(ValidationException exception){
         ApiError apiError = new ApiError(
                 HttpStatus.BAD_REQUEST,
@@ -24,7 +24,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(value = {TaskNotFoundException.class, UserNotFoundException.class, })
     protected ResponseEntity<ApiError> handleNotFoundException(NotFoundException exception){
         ApiError apiError = new ApiError(
-                HttpStatus.BAD_REQUEST,
+                HttpStatus.FORBIDDEN,
                 List.of(exception.getValidationError()),
                 exception.getMessage()
         );
