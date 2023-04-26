@@ -14,11 +14,14 @@ import org.springframework.http.MediaType;
 import ru.timutkin.tdd.dto.TaskDto;
 import ru.timutkin.tdd.exception.IncorrectFieldException;
 import ru.timutkin.tdd.exception.IncorrectPathVariableException;
+import ru.timutkin.tdd.exception.IncorrectRequestParamException;
 import ru.timutkin.tdd.service.TaskService;
+import ru.timutkin.tdd.utils.DateFormatHM;
 import ru.timutkin.tdd.web.controller.data.TaskDtoData;
 import ru.timutkin.tdd.web.request.CreationTaskRequest;
 
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -73,26 +76,23 @@ class TaskControllerTest {
         );
     }
 
-    @Test
-    void findAll_ReturnValidResponseEntity() {
-        List<TaskDto> taskDtoList = TaskDtoData.getValidListTaskDto();
-        doReturn(taskDtoList).when(this.taskService).findAll();
-        var response = controller.findAll();
-        assertAll(
-                () -> assertNotNull(response),
-                () -> assertEquals(HttpStatus.OK, response.getStatusCode()),
-                () -> assertEquals(MediaType.APPLICATION_JSON, response.getHeaders().getContentType()),
-                () -> assertEquals(taskDtoList, response.getBody())
-        );
-    }
 
 
     @Test
     void updateTask_TaskIsNonValid_ThrowsIncorrectFieldException() {
-        List<TaskDto> nonValidTaskDto = TaskDtoData.getNonValidListTaskDto();
-        for (TaskDto dto : nonValidTaskDto) {
-            assertThrows(IncorrectFieldException.class, () -> controller.updateTask(dto));
-        }
+        TaskDto first = TaskDto.builder().id(0L).build();
+        TaskDto second = TaskDto.builder().id(1L).dataTimeOfCreation(LocalDateTime.now()).build();
+        TaskDto third = TaskDto.builder().id(1L).taskName("  ").build();
+        TaskDto fourth = TaskDto.builder().id(1L).message(" ").build();
+        TaskDto fifth = TaskDto.builder().id(1L).status("open").build();
+        TaskDto sixth = TaskDto.builder().id(1L).userId(0L).build();
+        assertThrows(IncorrectFieldException.class, () -> controller.updateTask(first));
+        assertThrows(IncorrectFieldException.class, () -> controller.updateTask(second));
+        assertThrows(IncorrectFieldException.class, () -> controller.updateTask(third));
+        assertThrows(IncorrectFieldException.class, () -> controller.updateTask(fourth));
+        assertThrows(IncorrectFieldException.class, () -> controller.updateTask(fifth));
+        assertThrows(IncorrectFieldException.class, () -> controller.updateTask(sixth));
+
     }
 
     @Test
@@ -133,7 +133,7 @@ class TaskControllerTest {
     @ValueSource(longs = {0L, -1L, -3L})
     @NullSource
     void deleteById_TaskIdIsNonValid_ThrowsIncorrectPathVariableException(Long taskId) {
-        assertThrows(IncorrectPathVariableException.class, ()->controller.deleteById(taskId));
+        assertThrows(IncorrectPathVariableException.class, () -> controller.deleteById(taskId));
     }
 
     @Test
@@ -152,9 +152,39 @@ class TaskControllerTest {
     @ValueSource(longs = {0L, -1L, -3L})
     @NullSource
     void findById_TaskIdIsNonValid_ThrowsException(Long taskId) {
-        assertThrows(IncorrectPathVariableException.class, ()->controller.deleteById(taskId));
+        assertThrows(IncorrectPathVariableException.class, () -> controller.deleteById(taskId));
     }
 
 
+    @Test
+    void findAllByParam_TaskFindParamIsValid_ReturnsValidResponseEntity() {
+        when(this.taskService.findByParam(Optional.of(DateFormatHM.allTime), Optional.of(DateFormatHM.allTime),
+                Optional.of("taskName"), Optional.of("message"), Optional.of("OPEN"), Optional.of(1L)))
+                .thenReturn(TaskDtoData.getValidListTaskDto());
+        var response = controller.findAllByParam(Optional.of(DateFormatHM.allTime), Optional.of(DateFormatHM.allTime),
+                Optional.of("taskName"), Optional.of("message"), Optional.of("OPEN"), Optional.of(1L));
+        assertAll(
+                () -> assertNotNull(response),
+                () -> assertEquals(HttpStatus.OK, response.getStatusCode()),
+                () -> assertEquals(MediaType.APPLICATION_JSON, response.getHeaders().getContentType()),
+                () -> assertEquals(TaskDtoData.getValidListTaskDto(), response.getBody())
+        );
+    }
 
+    @Test
+    void findAllByParam_TaskFindParamIsNonValid_ThrowsException() {
+        assertThrows(IncorrectRequestParamException.class, () -> controller.findAllByParam(Optional.empty(), Optional.empty(),
+                Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(0L)));
+        assertThrows(IncorrectRequestParamException.class, () -> controller.findAllByParam(Optional.empty(), Optional.empty(),
+                Optional.empty(), Optional.empty(), Optional.of("open"), Optional.empty()));
+        assertThrows(IncorrectRequestParamException.class, () -> controller.findAllByParam(Optional.empty(), Optional.empty(),
+                Optional.empty(), Optional.of("    "), Optional.empty(), Optional.empty()));
+        assertThrows(IncorrectRequestParamException.class, () -> controller.findAllByParam(Optional.empty(), Optional.empty(),
+                Optional.of("      "), Optional.empty(), Optional.empty(), Optional.empty()));
+        assertThrows(IncorrectRequestParamException.class, () -> controller.findAllByParam(Optional.empty(), Optional.of(LocalDateTime.now()),
+                Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()));
+        assertThrows(IncorrectRequestParamException.class, () -> controller.findAllByParam(Optional.of(LocalDateTime.now()), Optional.empty(),
+                Optional.empty(), Optional.empty(), Optional.of("OPEN"), Optional.empty()));
+
+    }
 }

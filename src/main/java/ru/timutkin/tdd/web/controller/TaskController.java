@@ -11,12 +11,14 @@ import ru.timutkin.tdd.web.constant.ApiConstant;
 import ru.timutkin.tdd.web.request.CreationTaskRequest;
 import ru.timutkin.tdd.web.validation.TaskControllerValidation;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @AllArgsConstructor
 @RequestMapping(
-        value =    ApiConstant.VERSION_API+ "/tasks",
+        value = ApiConstant.VERSION_API + "/tasks",
         produces = MediaType.APPLICATION_JSON_VALUE
 )
 public class TaskController {
@@ -33,7 +35,7 @@ public class TaskController {
     }
 
     @PutMapping
-    public ResponseEntity<TaskDto> updateTask(@RequestBody TaskDto taskDto){
+    public ResponseEntity<TaskDto> updateTask(@RequestBody TaskDto taskDto) {
         TaskControllerValidation.validateUpdate(taskDto);
         TaskDto updatedTaskDto = taskService.update(taskDto);
         return ResponseEntity.ok()
@@ -42,25 +44,33 @@ public class TaskController {
     }
 
 
+    @GetMapping("/{taskId}")
+    public ResponseEntity<TaskDto> findById(@PathVariable Long taskId) {
+        TaskControllerValidation.validatePathVariableId(taskId);
+        TaskDto task = taskService.findById(taskId);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(task);
+    }
+
     @GetMapping
-    public ResponseEntity<List<TaskDto>> findAll(){
-        List<TaskDto> taskDtoList = taskService.findAll();
+    public ResponseEntity<List<TaskDto>> findAllByParam(@RequestParam(name = "after") Optional<LocalDateTime> after,
+                                                        @RequestParam(name = "before") Optional<LocalDateTime> before,
+                                                        @RequestParam(name = "taskName") Optional<String> taskName,
+                                                        @RequestParam(name = "message") Optional<String> message,
+                                                        @RequestParam(name = "status") Optional<String> status,
+                                                        @RequestParam(name = "userId") Optional<Long> userId
+
+    ) {
+        TaskControllerValidation.validateFilter(after, before, taskName, message, status, userId);
+        List<TaskDto> taskDtoList = taskService.findByParam(after, before, taskName, message, status, userId);
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(taskDtoList);
     }
 
-    @GetMapping("/{taskId}")
-    public ResponseEntity<TaskDto> findById(@PathVariable Long taskId){
-        TaskControllerValidation.validatePathVariableId(taskId);
-        TaskDto task = taskService.findById(taskId);
-        return  ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(task);
-    }
-
     @DeleteMapping("/{taskId}")
-    public ResponseEntity<Long> deleteById(@PathVariable(required = false) Long taskId){
+    public ResponseEntity<Long> deleteById(@PathVariable(required = false) Long taskId) {
         TaskControllerValidation.validatePathVariableId(taskId);
         taskService.deleteById(taskId);
         return ResponseEntity.ok()
