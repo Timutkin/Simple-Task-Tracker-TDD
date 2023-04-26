@@ -4,7 +4,6 @@ import lombok.experimental.UtilityClass;
 import ru.timutkin.tdd.dto.TaskDto;
 import ru.timutkin.tdd.utils.DateFormatHM;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,20 +12,10 @@ import java.util.List;
 public class TaskDtoData {
 
 
-    private static final List<TaskDto> nonValidTaskDto = new ArrayList<>();
 
     private static final List<TaskDto> validTaskDto = new ArrayList<>();
 
     static {
-        Collections.addAll(nonValidTaskDto,
-                TaskDto.builder().id(1L).build(),
-                TaskDto.builder().id(0L).build(),
-                TaskDto.builder().id(1L).dataTimeOfCreation(DateFormatHM.allTime).build(),
-                TaskDto.builder().id(1L).taskName(" ").build(),
-                TaskDto.builder().id(1L).message(" ").build(),
-                TaskDto.builder().id(1L).status("OpEn").build(),
-                TaskDto.builder().id(1L).userId(0L).build()
-        );
         Collections.addAll(validTaskDto,
                 TaskDto.builder()
                         .id(1L)
@@ -50,10 +39,6 @@ public class TaskDtoData {
                         .dataTimeOfCreation(DateFormatHM.allTime)
                         .build()
                 );
-    }
-
-    public static List<TaskDto> getNonValidListTaskDto(){
-        return nonValidTaskDto;
     }
 
     public static List<TaskDto> getValidListTaskDto(){
