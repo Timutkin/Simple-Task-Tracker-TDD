@@ -18,7 +18,7 @@ import ru.timutkin.tdd.exception.IncorrectRequestParamException;
 import ru.timutkin.tdd.service.TaskService;
 import ru.timutkin.tdd.utils.DateFormatHM;
 import ru.timutkin.tdd.web.controller.data.TaskDtoData;
-import ru.timutkin.tdd.web.request.CreationTaskRequest;
+import ru.timutkin.tdd.dto.CreationTaskRequest;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
