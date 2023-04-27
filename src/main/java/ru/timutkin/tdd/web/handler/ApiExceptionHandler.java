@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.timutkin.tdd.exception.*;
+import ru.timutkin.tdd.web.handler.error_objects.ApiError;
 
 import java.util.List;
 

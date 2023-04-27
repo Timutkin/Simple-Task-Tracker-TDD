@@ -1,8 +1,7 @@
-package ru.timutkin.tdd.web.handler;
+package ru.timutkin.tdd.web.handler.error_objects;
 
 import lombok.Builder;
 import lombok.Data;
-import ru.timutkin.tdd.web.validation.CreateUpdateTask;
 
 @Data
 @Builder

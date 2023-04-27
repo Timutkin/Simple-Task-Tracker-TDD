@@ -9,11 +9,11 @@ import java.time.LocalDateTime;
 
 @UtilityClass
 public class DataValidation {
-    public static boolean validate(LocalDateTime date) {
+    public static boolean validate(LocalDateTime date){
         try {
-            DateFormatHM.formatter.parse(date.toString());
+            Instant.from(DateFormatHM.formatter.parse(date.toString()));
             return true;
-        } catch (DateTimeException ignored) {
+        } catch (DateTimeException ignored){
         }
         return false;
     }

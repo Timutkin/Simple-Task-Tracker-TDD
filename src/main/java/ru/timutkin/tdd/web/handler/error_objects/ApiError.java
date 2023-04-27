@@ -1,4 +1,4 @@
-package ru.timutkin.tdd.web.handler;
+package ru.timutkin.tdd.web.handler.error_objects;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
