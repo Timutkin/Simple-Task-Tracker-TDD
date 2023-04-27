@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.timutkin.tdd.dto.TaskDto;
 import ru.timutkin.tdd.service.TaskService;
 import ru.timutkin.tdd.web.constant.ApiConstant;
-import ru.timutkin.tdd.web.request.CreationTaskRequest;
+import ru.timutkin.tdd.dto.CreationTaskRequest;
 import ru.timutkin.tdd.web.validation.TaskControllerValidation;
 
 import java.time.LocalDateTime;

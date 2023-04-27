@@ -16,7 +16,4 @@ public class ValidationConstant {
     public static final String THE_MESSAGE_SHOULD_NOT_BE_EMPTY_CONSIST_OF_SPACES = "The message should not be empty, consist of spaces";
     public static final String THE_USER_ID_SHOULD_NOT_BE_LESS_OR_EQUAL_0 = "The user id should not be <= 0";
 
-
-
-
 }

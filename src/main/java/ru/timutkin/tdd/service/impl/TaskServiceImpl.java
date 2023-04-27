@@ -16,8 +16,9 @@ import ru.timutkin.tdd.repository.TaskRepository;
 import ru.timutkin.tdd.repository.UserRepository;
 import ru.timutkin.tdd.repository.specifiction.TaskSpecification;
 import ru.timutkin.tdd.service.TaskService;
-import ru.timutkin.tdd.web.handler.ApiValidationError;
-import ru.timutkin.tdd.web.request.CreationTaskRequest;
+import ru.timutkin.tdd.web.constant.ValidationConstant;
+import ru.timutkin.tdd.web.handler.error_objects.ApiValidationError;
+import ru.timutkin.tdd.dto.CreationTaskRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,7 +43,7 @@ public class TaskServiceImpl implements TaskService {
                 userRepository.findById(taskRequest.getUserId()).orElseThrow(
                         () -> new UserNotFoundException(
                                 ApiValidationError.getApiValidationError(taskRequest,
-                                        "User with id = " + taskRequest.getUserId() + " not found",
+                                        ValidationConstant.USER_WITH_ID_NOT_FOUND.formatted(taskRequest.getUserId()),
                                         "userID", taskRequest.getUserId())
                         )));
         taskRepository.saveAndFlush(taskEntity);
@@ -65,18 +66,20 @@ public class TaskServiceImpl implements TaskService {
         TaskEntity task = taskRepository.findById(taskDto.getId()).orElseThrow(
                 () -> new TaskNotFoundException(
                         ApiValidationError.getApiValidationError(taskDto,
-                                "Task with id = " + taskDto.getId() + " not found",
+                                ValidationConstant.TASK_WITH_ID_NOT_FOUND.formatted(taskDto.getId()),
                                 "id", taskDto.getId())
                 )
         );
-        UserEntity newUser = userRepository.findById(taskDto.getUserId()).orElseThrow(
-                () -> new UserNotFoundException(
-                        ApiValidationError.getApiValidationError(taskDto,
-                                "User with id = " + taskDto.getUserId() + " not found",
-                                "userID", taskDto.getUserId()))
-        );
+        if (taskDto.getUserId() != null){
+            UserEntity newUser = userRepository.findById(taskDto.getUserId()).orElseThrow(
+                    () -> new UserNotFoundException(
+                            ApiValidationError.getApiValidationError(taskDto,
+                                    ValidationConstant.USER_WITH_ID_NOT_FOUND.formatted(taskDto.getUserId()),
+                                    "userID", taskDto.getUserId()))
+            );
+            task.setUser(newUser);
+        }
         taskMapper.updateTaskEntityFromTaskDto(taskDto, task);
-        task.setUser(newUser);
         taskRepository.saveAndFlush(task);
         return taskMapper.taskEntityToTaskDto(task);
     }
@@ -88,7 +91,7 @@ public class TaskServiceImpl implements TaskService {
         TaskEntity task = taskRepository.findById(taskId).orElseThrow(
                 () -> new TaskNotFoundException(ApiValidationError.builder()
                         .rejectedValue(taskId)
-                        .message("Task with id = " + taskId + " not found")
+                        .message(ValidationConstant.TASK_WITH_ID_NOT_FOUND.formatted(taskId))
                         .field("/{taskId}")
                         .build())
         );
@@ -102,7 +105,7 @@ public class TaskServiceImpl implements TaskService {
                 taskRepository.findById(taskId).orElseThrow(
                         () -> new TaskNotFoundException(ApiValidationError.builder()
                                 .rejectedValue(taskId)
-                                .message("Task with id = " + taskId + " not found")
+                                .message(ValidationConstant.TASK_WITH_ID_NOT_FOUND.formatted(taskId))
                                 .field("/{taskId}")
                                 .build())
                 )
