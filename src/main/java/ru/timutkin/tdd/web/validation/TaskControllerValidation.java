@@ -7,38 +7,39 @@ import ru.timutkin.tdd.exception.IncorrectFieldException;
 
 import ru.timutkin.tdd.exception.IncorrectPathVariableException;
 import ru.timutkin.tdd.exception.IncorrectRequestParamException;
-import ru.timutkin.tdd.web.handler.ApiValidationError;
-import ru.timutkin.tdd.web.request.CreationTaskRequest;
+import ru.timutkin.tdd.web.constant.ValidationConstant;
+import ru.timutkin.tdd.web.handler.error_objects.ApiValidationError;
+import ru.timutkin.tdd.dto.CreationTaskRequest;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static ru.timutkin.tdd.web.handler.ApiValidationError.*;
+import static ru.timutkin.tdd.web.handler.error_objects.ApiValidationError.*;
 
 @UtilityClass
 public class TaskControllerValidation {
 
     public static void validateUpdate(TaskDto taskDto) throws IncorrectFieldException {
         if (taskDto.getId() == null || taskDto.getId() <= 0) {
-            String message = "The id should not be null or <= 0";
+            String message = ValidationConstant.THE_ID_SHOULD_NOT_BE_NULL_OR_LESS_OR_EQUAL_0;
             throw new IncorrectFieldException(
                     getApiValidationError(taskDto, message, "id", taskDto.getId())
             );
         }
-        if (taskDto.getDataTimeOfCreation() != null && !DataValidation.validate(taskDto.getDataTimeOfCreation())) {
-            String message = "Correct format: yyyy-MM-dd HH:mm";
+        if (taskDto.getDataTimeOfCreation() != null && DataValidation.validate(taskDto.getDataTimeOfCreation())) {
+            String message = ValidationConstant.CORRECT_DATA_FORMAT;
             throw new IncorrectFieldException(
                     getApiValidationError(taskDto, message, "dataTimeOfCreation", taskDto.getDataTimeOfCreation())
             );
         }
         if (taskDto.getTaskName() != null && taskDto.getTaskName().isBlank()) {
-            String message = "The task name should not be empty, consist of spaces";
+            String message = ValidationConstant.THE_TASK_NAME_SHOULD_NOT_BE_EMPTY_CONSIST_OF_SPACES;
             throw new IncorrectFieldException(
                     getApiValidationError(taskDto, message, "taskName", taskDto.getTaskName())
             );
         }
         if (taskDto.getMessage() != null && taskDto.getMessage().isBlank()) {
-            String message = "The message should not be empty, consist of spaces";
+            String message = ValidationConstant.THE_MESSAGE_SHOULD_NOT_BE_EMPTY_CONSIST_OF_SPACES;
             throw new IncorrectFieldException(
                     getApiValidationError(taskDto, message, "message", taskDto.getMessage())
             );
@@ -49,13 +50,13 @@ public class TaskControllerValidation {
                         status.equals(Status.REOPENED.toString()) || status.equals(Status.RESOLVED.toString()) ||
                         status.equals(Status.CLOSED.toString())
                 )) {
-            String message = "Acceptable values: OPEN, IN_PROGRESS, RESOLVED, REOPENED, CLOSED";
+            String message = ValidationConstant.VALUES_OPEN_IN_PROGRESS_RESOLVED_REOPENED_CLOSED;
             throw new IncorrectFieldException(
                     getApiValidationError(taskDto, message, "status", taskDto.getStatus())
             );
         }
         if (taskDto.getUserId() != null && taskDto.getUserId() <= 0) {
-            String message = "The user id should not be <= 0";
+            String message = ValidationConstant.THE_USER_ID_SHOULD_NOT_BE_LESS_OR_EQUAL_0;
             throw new IncorrectFieldException(
                     getApiValidationError(taskDto, message, "userId", taskDto.getUserId())
             );
@@ -65,19 +66,19 @@ public class TaskControllerValidation {
     public static void validateCreate(CreationTaskRequest request) throws IncorrectFieldException {
 
         if (request.getTaskName() == null || request.getTaskName().isBlank()) {
-            String message = "The task name should not be empty, consist of spaces or be null";
+            String message = ValidationConstant.THE_TASK_NAME_SHOULD_NOT_BE_EMPTY_CONSIST_OF_SPACES;
             throw new IncorrectFieldException(
                     getApiValidationError(request, message, "taskName", request.getTaskName())
             );
         }
         if (request.getMessage() == null || request.getMessage().isBlank()) {
-            String message = "The message should not be empty, consist of spaces or be null";
+            String message = ValidationConstant.THE_MESSAGE_SHOULD_NOT_BE_EMPTY_CONSIST_OF_SPACES;
             throw new IncorrectFieldException(
                     getApiValidationError(request, message, "message", request.getMessage())
             );
         }
         if (request.getUserId() == null || request.getUserId() <= 0) {
-            String message = "The user id should not be null or <= 0";
+            String message = ValidationConstant.THE_USER_ID_SHOULD_NOT_BE_LESS_OR_EQUAL_0;
             throw new IncorrectFieldException(
                     getApiValidationError(request, message, "userId", request.getUserId())
             );
@@ -88,7 +89,7 @@ public class TaskControllerValidation {
         if (id == null || id <= 0) {
             throw new IncorrectPathVariableException(ApiValidationError.builder()
                     .rejectedValue(id)
-                    .message("The id should not be null or <= 0")
+                    .message(ValidationConstant.THE_ID_SHOULD_NOT_BE_NULL_OR_LESS_OR_EQUAL_0)
                     .field("/{taskId}")
                     .build());
         }
@@ -96,34 +97,34 @@ public class TaskControllerValidation {
 
     public static void validateFilter(Optional<LocalDateTime> after, Optional<LocalDateTime> before,
                                       Optional<String> taskName, Optional<String> message,
-                                      Optional<String> stas, Optional<Long> userId) {
+                                      Optional<String> status, Optional<Long> userId) {
 
         after.ifPresent(localDateTime -> {
-            String exMessage = "Correct format: yyyy-MM-dd HH:mm";
-            if (!DataValidation.validate(localDateTime)) {
+            String exMessage = ValidationConstant.CORRECT_DATA_FORMAT;
+            if (DataValidation.validate(localDateTime)) {
                 throw new IncorrectRequestParamException(getApiValidationError(localDateTime, exMessage, "after", localDateTime));
             }
         });
         before.ifPresent(localDateTime -> {
-            String exMessage = "Correct format: yyyy-MM-dd HH:mm";
-            if (!DataValidation.validate(localDateTime)) {
+            String exMessage = ValidationConstant.CORRECT_DATA_FORMAT;
+            if (DataValidation.validate(localDateTime)) {
                 throw new IncorrectRequestParamException(getApiValidationError(localDateTime, exMessage, "before", localDateTime));
             }
         });
         taskName.ifPresent(name -> {
-            String exMessage = "The task name should not be empty, consist of spaces";
+            String exMessage = ValidationConstant.THE_TASK_NAME_SHOULD_NOT_BE_EMPTY_CONSIST_OF_SPACES;
             if (name.isBlank()) {
                 throw new IncorrectRequestParamException(getApiValidationError(name, exMessage, "taskName", name));
             }
         });
         message.ifPresent(mess -> {
-            String exMessage = "The message should not be empty, consist of spaces";
+            String exMessage = ValidationConstant.THE_MESSAGE_SHOULD_NOT_BE_EMPTY_CONSIST_OF_SPACES;
             if (mess.isBlank()) {
                 throw new IncorrectRequestParamException(getApiValidationError(mess, exMessage, "message", mess));
             }
         });
-        stas.ifPresent(stat -> {
-            String exMessage = "Acceptable values: OPEN, IN_PROGRESS, RESOLVED, REOPENED, CLOSED";
+        status.ifPresent(stat -> {
+            String exMessage = ValidationConstant.VALUES_OPEN_IN_PROGRESS_RESOLVED_REOPENED_CLOSED;
             if (!(stat.equals(Status.OPEN.toString()) || stat.equals(Status.IN_PROGRESS.toString()) ||
                     stat.equals(Status.REOPENED.toString()) || stat.equals(Status.RESOLVED.toString()) ||
                     stat.equals(Status.CLOSED.toString()))) {
@@ -131,16 +132,12 @@ public class TaskControllerValidation {
             }
         });
         userId.ifPresent(id -> {
-            String exMessage = "The id should not be <= 0";
+            String exMessage = ValidationConstant.THE_ID_SHOULD_NOT_BE_NULL_OR_LESS_OR_EQUAL_0;
             if (id <= 0) {
                 throw new IncorrectRequestParamException(getApiValidationError(id, exMessage, "userId", id));
             }
         });
 
-    }
-
-    public static void main(String[] args) {
-        System.out.println(LocalDateTime.now());
     }
 }
 
