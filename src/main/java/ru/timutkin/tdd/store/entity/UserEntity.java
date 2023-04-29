@@ -1,8 +1,11 @@
-package ru.timutkin.tdd.entity;
+package ru.timutkin.tdd.store.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Getter
@@ -30,5 +33,13 @@ public class UserEntity {
     String email;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    DepartmentEntity department;
+    @JoinColumn(name = "department_id")
+    DepartmentEntity department ;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    List<TaskEntity> taskEntityList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "userHead", fetch = FetchType.LAZY)
+    List<ProjectEntity> projectEntityList = new ArrayList<>();
+
 }

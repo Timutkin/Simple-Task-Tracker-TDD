@@ -1,4 +1,4 @@
-package ru.timutkin.tdd.entity;
+package ru.timutkin.tdd.store.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "department")
+@Table(name = "department", schema = "public")
 public class DepartmentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "DepartmentEntity_SEQ")
