@@ -11,8 +11,6 @@ import java.util.Optional;
 public interface TaskService {
     TaskDto save(CreationTaskRequest taskRequest);
 
-    List<TaskDto> findAll();
-
     TaskDto update(TaskDto taskDto);
 
     void deleteById(Long taskId);
@@ -21,5 +19,7 @@ public interface TaskService {
 
     List<TaskDto> findByParam(Optional<LocalDateTime> after, Optional<LocalDateTime> before,
                               Optional<String> taskName, Optional<String> message,
-                              Optional<String> status, Optional<Long> userId);
+                              Optional<String> status, Optional<Long> userId, Optional<Long> projectId);
+
+    List<TaskDto> findListOfTaskByUserId(Long userId);
 }

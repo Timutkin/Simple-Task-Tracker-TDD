@@ -46,7 +46,7 @@ public class TaskController {
 
     @GetMapping("/{taskId}")
     public ResponseEntity<TaskDto> findById(@PathVariable Long taskId) {
-        TaskControllerValidation.validatePathVariableId(taskId);
+        TaskControllerValidation.validatePathVariableAndRequestParamId(taskId);
         TaskDto task = taskService.findById(taskId);
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -59,11 +59,20 @@ public class TaskController {
                                                         @RequestParam(name = "taskName") Optional<String> taskName,
                                                         @RequestParam(name = "message") Optional<String> message,
                                                         @RequestParam(name = "status") Optional<String> status,
-                                                        @RequestParam(name = "userId") Optional<Long> userId
-
+                                                        @RequestParam(name = "userId") Optional<Long> userId,
+                                                        @RequestParam(name = "projectId") Optional<Long> projectId
     ) {
-        TaskControllerValidation.validateFilter(after, before, taskName, message, status, userId);
-        List<TaskDto> taskDtoList = taskService.findByParam(after, before, taskName, message, status, userId);
+        TaskControllerValidation.validateFilter(after, before, taskName, message, status, userId, projectId);
+        List<TaskDto> taskDtoList = taskService.findByParam(after, before, taskName, message, status, userId, projectId);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(taskDtoList);
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<TaskDto>> findListOfTaskEntityByUserId(@PathVariable Long userId) {
+        TaskControllerValidation.validatePathVariableAndRequestParamId(userId);
+        List<TaskDto> taskDtoList = taskService.findListOfTaskByUserId(userId);
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(taskDtoList);
@@ -71,7 +80,7 @@ public class TaskController {
 
     @DeleteMapping("/{taskId}")
     public ResponseEntity<Long> deleteById(@PathVariable(required = false) Long taskId) {
-        TaskControllerValidation.validatePathVariableId(taskId);
+        TaskControllerValidation.validatePathVariableAndRequestParamId(taskId);
         taskService.deleteById(taskId);
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)

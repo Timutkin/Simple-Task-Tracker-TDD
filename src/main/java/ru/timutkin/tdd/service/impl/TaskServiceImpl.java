@@ -7,14 +7,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.timutkin.tdd.dto.TaskDto;
-import ru.timutkin.tdd.entity.TaskEntity;
-import ru.timutkin.tdd.entity.UserEntity;
+import ru.timutkin.tdd.exception.ProjectNotFoundException;
+import ru.timutkin.tdd.store.entity.ProjectEntity;
+import ru.timutkin.tdd.store.entity.TaskEntity;
+import ru.timutkin.tdd.store.entity.UserEntity;
 import ru.timutkin.tdd.exception.TaskNotFoundException;
 import ru.timutkin.tdd.exception.UserNotFoundException;
 import ru.timutkin.tdd.mapper.TaskMapper;
-import ru.timutkin.tdd.repository.TaskRepository;
-import ru.timutkin.tdd.repository.UserRepository;
-import ru.timutkin.tdd.repository.specifiction.TaskSpecification;
+import ru.timutkin.tdd.store.repository.ProjectRepository;
+import ru.timutkin.tdd.store.repository.TaskRepository;
+import ru.timutkin.tdd.store.repository.UserRepository;
+import ru.timutkin.tdd.store.repository.specifiction.TaskSpecification;
 import ru.timutkin.tdd.service.TaskService;
 import ru.timutkin.tdd.web.constant.ValidationConstant;
 import ru.timutkin.tdd.web.handler.error_objects.ApiValidationError;
@@ -35,8 +38,10 @@ public class TaskServiceImpl implements TaskService {
 
     private final TaskMapper taskMapper;
 
+    private final ProjectRepository projectRepository;
+
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public TaskDto save(CreationTaskRequest taskRequest) {
         TaskEntity taskEntity = new TaskEntity(taskRequest.getTaskName(), taskRequest.getMessage());
         taskEntity.setUser(
@@ -46,22 +51,22 @@ public class TaskServiceImpl implements TaskService {
                                         ValidationConstant.USER_WITH_ID_NOT_FOUND.formatted(taskRequest.getUserId()),
                                         "userID", taskRequest.getUserId())
                         )));
+        taskEntity.setProject(
+                projectRepository.findById(taskRequest.getProjectId()).orElseThrow(
+                        () -> new ProjectNotFoundException(
+                                ApiValidationError.getApiValidationError(taskRequest,
+                                        ValidationConstant.PROJECT_WITH_ID_NOT_FOUND.formatted(taskRequest.getProjectId()),
+                                        "projectId", taskRequest.getProjectId()))
+                )
+        );
         taskRepository.saveAndFlush(taskEntity);
         return taskMapper.taskEntityToTaskDto(taskEntity);
     }
 
 
-    @Transactional(isolation = Isolation.READ_COMMITTED)
     @Override
-    public List<TaskDto> findAll() {
-        return taskRepository.findAll()
-                .stream()
-                .map(taskMapper::taskEntityToTaskDto)
-                .toList();
-    }
-
-    @Override
-    @Transactional
+    @Retryable(maxAttempts = 2)
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public TaskDto update(TaskDto taskDto) {
         TaskEntity task = taskRepository.findById(taskDto.getId()).orElseThrow(
                 () -> new TaskNotFoundException(
@@ -78,6 +83,15 @@ public class TaskServiceImpl implements TaskService {
                                     "userID", taskDto.getUserId()))
             );
             task.setUser(newUser);
+        }
+        if (taskDto.getProjectId() != null){
+            ProjectEntity newProject = projectRepository.findById(taskDto.getId()).orElseThrow(
+                    () -> new ProjectNotFoundException(
+                            ApiValidationError.getApiValidationError(taskDto,
+                                    ValidationConstant.PROJECT_WITH_ID_NOT_FOUND.formatted(taskDto.getProjectId()),
+                                    "projectId", taskDto.getProjectId()))
+            );
+            task.setProject(newProject);
         }
         taskMapper.updateTaskEntityFromTaskDto(taskDto, task);
         taskRepository.saveAndFlush(task);
@@ -113,12 +127,21 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<TaskDto> findByParam(Optional<LocalDateTime> after, Optional<LocalDateTime> before,
                                      Optional<String> taskName, Optional<String> message,
-                                     Optional<String> status, Optional<Long> userId) {
+                                     Optional<String> status, Optional<Long> userId, Optional<Long> projectId) {
         return taskRepository.findAll(
-                Specification.where(TaskSpecification.filterTasks(after, before, taskName, message, status, userId))
+                Specification.where(TaskSpecification.filterTasks(after, before, taskName, message, status, userId, projectId))
         ).stream().map(taskMapper::taskEntityToTaskDto).toList();
+    }
+
+    @Override
+    public List<TaskDto> findListOfTaskByUserId(Long userId) {
+        return taskRepository.findTaskEntityByUserId(userId)
+                .stream()
+                .map(taskMapper::taskEntityToTaskDto)
+                .toList();
     }
 
 }

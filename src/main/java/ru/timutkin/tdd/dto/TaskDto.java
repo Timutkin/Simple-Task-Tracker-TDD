@@ -14,9 +14,10 @@ import java.time.LocalDateTime;
 @Builder
 public class TaskDto {
     Long id;
-    LocalDateTime dataTimeOfCreation;
+    LocalDateTime createdAt;
     String taskName;
     String message;
     String status;
     Long userId;
+    Long projectId;
 }

@@ -11,10 +11,15 @@ import java.time.LocalDateTime;
 public class DataValidation {
     public static boolean validate(LocalDateTime date){
         try {
-            Instant.from(DateFormatHM.formatter.parse(date.toString()));
+            DateFormatHM.formatter.parse(date.toString());
             return true;
-        } catch (DateTimeException ignored){
+        } catch (DateTimeException ignored) {
         }
         return false;
+    }
+
+
+    public static void main(String[] args) {
+        System.out.println(validate(LocalDateTime.parse("2023-04-28T23:15:15.087846200")));
     }
 }

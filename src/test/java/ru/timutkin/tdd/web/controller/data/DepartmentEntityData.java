@@ -1,7 +1,7 @@
 package ru.timutkin.tdd.web.controller.data;
 
 import lombok.experimental.UtilityClass;
-import ru.timutkin.tdd.entity.DepartmentEntity;
+import ru.timutkin.tdd.store.entity.DepartmentEntity;
 
 import java.util.ArrayList;
 import java.util.Collections;

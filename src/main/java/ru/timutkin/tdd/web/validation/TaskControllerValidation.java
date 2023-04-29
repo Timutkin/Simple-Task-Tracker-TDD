@@ -26,10 +26,10 @@ public class TaskControllerValidation {
                     getApiValidationError(taskDto, message, "id", taskDto.getId())
             );
         }
-        if (taskDto.getDataTimeOfCreation() != null && DataValidation.validate(taskDto.getDataTimeOfCreation())) {
+        if (taskDto.getCreatedAt() != null && !DataValidation.validate(taskDto.getCreatedAt())) {
             String message = ValidationConstant.CORRECT_DATA_FORMAT;
             throw new IncorrectFieldException(
-                    getApiValidationError(taskDto, message, "dataTimeOfCreation", taskDto.getDataTimeOfCreation())
+                    getApiValidationError(taskDto, message, "createdAt", taskDto.getCreatedAt())
             );
         }
         if (taskDto.getTaskName() != null && taskDto.getTaskName().isBlank()) {
@@ -46,10 +46,10 @@ public class TaskControllerValidation {
         }
         String status = taskDto.getStatus();
         if (status != null &&
-                !(status.equals(Status.OPEN.toString()) || status.equals(Status.IN_PROGRESS.toString()) ||
-                        status.equals(Status.REOPENED.toString()) || status.equals(Status.RESOLVED.toString()) ||
-                        status.equals(Status.CLOSED.toString())
-                )) {
+            !(status.equals(Status.OPEN.toString()) || status.equals(Status.IN_PROGRESS.toString()) ||
+              status.equals(Status.REOPENED.toString()) || status.equals(Status.RESOLVED.toString()) ||
+              status.equals(Status.CLOSED.toString())
+            )) {
             String message = ValidationConstant.VALUES_OPEN_IN_PROGRESS_RESOLVED_REOPENED_CLOSED;
             throw new IncorrectFieldException(
                     getApiValidationError(taskDto, message, "status", taskDto.getStatus())
@@ -61,6 +61,13 @@ public class TaskControllerValidation {
                     getApiValidationError(taskDto, message, "userId", taskDto.getUserId())
             );
         }
+        if (taskDto.getProjectId() != null && taskDto.getProjectId() <= 0) {
+            String message = ValidationConstant.THE_PROJECT_ID_SHOULD_NOT_BE_LESS_OR_EQUAL_0;
+            throw new IncorrectFieldException(
+                    getApiValidationError(taskDto, message, "projectId", taskDto.getProjectId())
+            );
+        }
+
     }
 
     public static void validateCreate(CreationTaskRequest request) throws IncorrectFieldException {
@@ -83,9 +90,15 @@ public class TaskControllerValidation {
                     getApiValidationError(request, message, "userId", request.getUserId())
             );
         }
+        if (request.getProjectId() == null || request.getProjectId() <= 0) {
+            String message = ValidationConstant.THE_ID_SHOULD_NOT_BE_NULL_OR_LESS_OR_EQUAL_0;
+            throw new IncorrectFieldException(
+                    getApiValidationError(request, message, "projectId", request.getProjectId())
+            );
+        }
     }
 
-    public static void validatePathVariableId(Long id) {
+    public static void validatePathVariableAndRequestParamId(Long id) {
         if (id == null || id <= 0) {
             throw new IncorrectPathVariableException(ApiValidationError.builder()
                     .rejectedValue(id)
@@ -97,17 +110,18 @@ public class TaskControllerValidation {
 
     public static void validateFilter(Optional<LocalDateTime> after, Optional<LocalDateTime> before,
                                       Optional<String> taskName, Optional<String> message,
-                                      Optional<String> status, Optional<Long> userId) {
+                                      Optional<String> status, Optional<Long> userId,
+                                      Optional<Long> projectId) {
 
         after.ifPresent(localDateTime -> {
             String exMessage = ValidationConstant.CORRECT_DATA_FORMAT;
-            if (DataValidation.validate(localDateTime)) {
+            if (!DataValidation.validate(localDateTime)) {
                 throw new IncorrectRequestParamException(getApiValidationError(localDateTime, exMessage, "after", localDateTime));
             }
         });
         before.ifPresent(localDateTime -> {
             String exMessage = ValidationConstant.CORRECT_DATA_FORMAT;
-            if (DataValidation.validate(localDateTime)) {
+            if (!DataValidation.validate(localDateTime)) {
                 throw new IncorrectRequestParamException(getApiValidationError(localDateTime, exMessage, "before", localDateTime));
             }
         });
@@ -126,8 +140,8 @@ public class TaskControllerValidation {
         status.ifPresent(stat -> {
             String exMessage = ValidationConstant.VALUES_OPEN_IN_PROGRESS_RESOLVED_REOPENED_CLOSED;
             if (!(stat.equals(Status.OPEN.toString()) || stat.equals(Status.IN_PROGRESS.toString()) ||
-                    stat.equals(Status.REOPENED.toString()) || stat.equals(Status.RESOLVED.toString()) ||
-                    stat.equals(Status.CLOSED.toString()))) {
+                  stat.equals(Status.REOPENED.toString()) || stat.equals(Status.RESOLVED.toString()) ||
+                  stat.equals(Status.CLOSED.toString()))) {
                 throw new IncorrectRequestParamException(getApiValidationError(stat, exMessage, "status", stat));
             }
         });
@@ -135,6 +149,12 @@ public class TaskControllerValidation {
             String exMessage = ValidationConstant.THE_ID_SHOULD_NOT_BE_NULL_OR_LESS_OR_EQUAL_0;
             if (id <= 0) {
                 throw new IncorrectRequestParamException(getApiValidationError(id, exMessage, "userId", id));
+            }
+        });
+        projectId.ifPresent(id ->{
+            String exMessage = ValidationConstant.THE_PROJECT_ID_SHOULD_NOT_BE_LESS_OR_EQUAL_0;
+            if (id <= 0){
+                throw new IncorrectRequestParamException(getApiValidationError(id, exMessage, "projectId", id));
             }
         });
 

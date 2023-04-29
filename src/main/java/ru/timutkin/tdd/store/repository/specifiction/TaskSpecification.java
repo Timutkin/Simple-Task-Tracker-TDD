@@ -1,9 +1,9 @@
-package ru.timutkin.tdd.repository.specifiction;
+package ru.timutkin.tdd.store.repository.specifiction;
 
 import jakarta.persistence.criteria.Predicate;
 import lombok.experimental.UtilityClass;
 import org.springframework.data.jpa.domain.Specification;
-import ru.timutkin.tdd.entity.TaskEntity;
+import ru.timutkin.tdd.store.entity.TaskEntity;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ public class TaskSpecification {
 
     public static Specification<TaskEntity> filterTasks(Optional<LocalDateTime> after, Optional<LocalDateTime> before,
                                                         Optional<String> taskName, Optional<String> message,
-                                                        Optional<String> status, Optional<Long> userId) {
+                                                        Optional<String> status, Optional<Long> userId, Optional<Long> projectId) {
         return (root, criteriaQuery, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
             taskName.ifPresent(s -> predicates.add(criteriaBuilder.and(
@@ -30,16 +30,19 @@ public class TaskSpecification {
             userId.ifPresent(aLong -> predicates.add(criteriaBuilder.and(
                     criteriaBuilder.equal(root.get("user"), aLong)
             )));
+            projectId.ifPresent(aLong -> predicates.add(criteriaBuilder.and(
+                    criteriaBuilder.equal(root.get("projectId"), aLong)
+            )));
             if (after.isPresent() && before.isPresent()){
                 predicates.add(criteriaBuilder.and(
-                        criteriaBuilder.greaterThanOrEqualTo(root.get("dataTimeOfCreation"), after.get())));
+                        criteriaBuilder.greaterThanOrEqualTo(root.get("createdAt"), after.get())));
                 predicates.add(criteriaBuilder.and(
-                        criteriaBuilder.lessThanOrEqualTo(root.get("dataTimeOfCreation"), before.get())));
+                        criteriaBuilder.lessThanOrEqualTo(root.get("createdAt"), before.get())));
             }
             after.ifPresent(localDateTime -> predicates.add(criteriaBuilder.and(
-                    criteriaBuilder.greaterThanOrEqualTo(root.get("dataTimeOfCreation"), localDateTime))));
+                    criteriaBuilder.greaterThanOrEqualTo(root.get("createdAt"), localDateTime))));
             before.ifPresent(localDateTime -> predicates.add(criteriaBuilder.and(
-                    criteriaBuilder.lessThanOrEqualTo(root.get("dataTimeOfCreation"), localDateTime))));
+                    criteriaBuilder.lessThanOrEqualTo(root.get("createdAt"), localDateTime))));
             return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
         };
 
