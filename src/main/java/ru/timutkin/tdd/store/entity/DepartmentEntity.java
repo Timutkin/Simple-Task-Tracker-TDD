@@ -2,7 +2,9 @@ package ru.timutkin.tdd.store.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
 @Setter
 @Builder
@@ -11,9 +13,10 @@ import lombok.*;
 @Entity
 @Table(name = "department", schema = "public")
 public class DepartmentEntity {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "DepartmentEntity_SEQ")
     @SequenceGenerator(name = "DepartmentEntity_SEQ")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "DepartmentEntity_SEQ")
     Long id;
 
     String name;
