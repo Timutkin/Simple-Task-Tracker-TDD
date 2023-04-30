@@ -1,5 +1,6 @@
 package ru.timutkin.tdd.web.controller;
 
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -10,11 +11,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import ru.timutkin.tdd.dto.CreationTaskRequest;
 import ru.timutkin.tdd.dto.TaskDto;
-import ru.timutkin.tdd.entity.TaskEntity;
-import ru.timutkin.tdd.entity.UserEntity;
+import ru.timutkin.tdd.store.entity.ProjectEntity;
+import ru.timutkin.tdd.store.entity.TaskEntity;
+import ru.timutkin.tdd.store.entity.UserEntity;
 import ru.timutkin.tdd.mapper.TaskMapper;
-import ru.timutkin.tdd.repository.TaskRepository;
-import ru.timutkin.tdd.repository.UserRepository;
+import ru.timutkin.tdd.store.repository.ProjectRepository;
+import ru.timutkin.tdd.store.repository.TaskRepository;
+import ru.timutkin.tdd.store.repository.UserRepository;
 import ru.timutkin.tdd.utils.DateFormatHM;
 import ru.timutkin.tdd.utils.JsonConverter;
 import ru.timutkin.tdd.web.constant.ApiConstant;
@@ -43,6 +46,8 @@ class TaskControllerIT {
     @Autowired
     UserRepository userRepository;
     @Autowired
+    ProjectRepository projectRepository;
+    @Autowired
     JsonConverter jsonConverter;
     @Autowired
     TaskMapper taskMapper;
@@ -53,9 +58,14 @@ class TaskControllerIT {
         userRepository.save(user);
         TaskDto task = TaskDtoData.getFirstValidTaskDto();
         task.setUserId(user.getId());
-        task.setDataTimeOfCreation(DateFormatHM.getDateTime());
+        task.setCreatedAt(DateFormatHM.getDateTime());
+        task.setProjectId(1L);
         String jsonTask = jsonConverter.convert(task);
-        CreationTaskRequest request = new CreationTaskRequest("API - POST : /api/v1/users", "Message", 1L);
+        projectRepository.save(ProjectEntity
+                .builder()
+                .name("Amazing project")
+                .build());
+        CreationTaskRequest request = new CreationTaskRequest("API - POST : /api/v1/users", "Message", 1L, 1L);
         String jsonTaskRequest = jsonConverter.convert(request);
         mvc.perform(post("/api/v1/tasks")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -70,9 +80,9 @@ class TaskControllerIT {
 
     @Test
     void createTask_TaskIsNonValidUserId_ReturnsBadRequest() throws Exception {
-        CreationTaskRequest first = new CreationTaskRequest("   ", "message", 1L);
-        CreationTaskRequest second = new CreationTaskRequest("task name", " ", 1L);
-        CreationTaskRequest third = new CreationTaskRequest("task name", "message", 1L);
+        CreationTaskRequest first = new CreationTaskRequest("   ", "message", 1L, 1L);
+        CreationTaskRequest second = new CreationTaskRequest("task name", " ", 1L, 1L);
+        CreationTaskRequest third = new CreationTaskRequest("task name", "message", 1L,1L);
         mvc.perform(post(ApiConstant.VERSION_API + "/tasks")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonConverter.convert(first))
@@ -297,7 +307,7 @@ class TaskControllerIT {
         TaskEntity first = TaskEntityData.getFirstValidTaskEntity();
         first.setUser(firstUserEntity);
         taskRepository.save(first);
-        TaskDto updatedTaskDto = new TaskDto(1L, DateFormatHM.allTime, "new task", "new message", "CLOSED", 2L);
+        TaskDto updatedTaskDto = new TaskDto(1L, DateFormatHM.allTime, "new task", "new message", "CLOSED", 2L ,null);
         mvc.perform(put(ApiConstant.VERSION_API + "/tasks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonConverter.convert(updatedTaskDto))
@@ -312,7 +322,7 @@ class TaskControllerIT {
     @Test
     void updateTask_TaskIsNonValid_ReturnsValidResponseEntity() throws Exception {
         TaskDto first = TaskDto.builder().id(0L).build();
-        TaskDto second = TaskDto.builder().id(1L).dataTimeOfCreation(LocalDateTime.now()).build();
+        TaskDto second = TaskDto.builder().id(1L).createdAt(LocalDateTime.now()).build();
         TaskDto third = TaskDto.builder().id(1L).taskName("  ").build();
         TaskDto fourth = TaskDto.builder().id(1L).message(" ").build();
         TaskDto fifth = TaskDto.builder().id(1L).status("open").build();
