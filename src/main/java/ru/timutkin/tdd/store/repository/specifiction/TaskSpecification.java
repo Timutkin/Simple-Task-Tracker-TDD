@@ -31,7 +31,7 @@ public class TaskSpecification {
                     criteriaBuilder.equal(root.get("user"), aLong)
             )));
             projectId.ifPresent(aLong -> predicates.add(criteriaBuilder.and(
-                    criteriaBuilder.equal(root.get("projectId"), aLong)
+                    criteriaBuilder.equal(root.get("project"), aLong)
             )));
             if (after.isPresent() && before.isPresent()){
                 predicates.add(criteriaBuilder.and(

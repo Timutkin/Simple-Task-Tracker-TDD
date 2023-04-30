@@ -14,4 +14,11 @@ public class  BaseApiException extends RuntimeException implements ApiException 
     public ApiValidationError getValidationError() {
         return apiValidationError;
     }
+
+    @Override
+    public String getMessage(){
+        return apiValidationError.getMessage();
+    }
+
+
 }
