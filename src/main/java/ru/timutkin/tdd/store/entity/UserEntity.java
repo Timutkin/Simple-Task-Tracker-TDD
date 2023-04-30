@@ -8,12 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "user", schema = "public")
 public class UserEntity {
@@ -36,9 +36,11 @@ public class UserEntity {
     @JoinColumn(name = "department_id")
     DepartmentEntity department ;
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     List<TaskEntity> taskEntityList = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "userHead", fetch = FetchType.LAZY)
     List<ProjectEntity> projectEntityList = new ArrayList<>();
 

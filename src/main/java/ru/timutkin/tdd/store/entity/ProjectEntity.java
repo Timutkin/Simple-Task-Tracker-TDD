@@ -2,17 +2,19 @@ package ru.timutkin.tdd.store.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
+import ru.timutkin.tdd.utils.DateFormatHM;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "project", schema = "public")
 public class ProjectEntity {
@@ -24,9 +26,11 @@ public class ProjectEntity {
     @Column(unique = true)
     private String name;
 
+    @Builder.Default
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = DateFormatHM.getDateTime();
 
+    @Builder.Default
     @OneToMany(mappedBy = "project")
     private List<TaskEntity> entityList = new ArrayList<>();
 

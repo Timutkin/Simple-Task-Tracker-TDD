@@ -25,7 +25,7 @@ public class TaskController {
 
     private final TaskService taskService;
 
-    @PostMapping()
+    @PostMapping
     public ResponseEntity<TaskDto> createTask(@RequestBody CreationTaskRequest request) {
         TaskControllerValidation.validateCreate(request);
         TaskDto task = taskService.save(request);
@@ -79,7 +79,7 @@ public class TaskController {
     }
 
     @DeleteMapping("/{taskId}")
-    public ResponseEntity<Long> deleteById(@PathVariable(required = false) Long taskId) {
+    public ResponseEntity<Long> deleteById(@PathVariable Long taskId) {
         TaskControllerValidation.validatePathVariableAndRequestParamId(taskId);
         taskService.deleteById(taskId);
         return ResponseEntity.ok()

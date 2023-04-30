@@ -11,12 +11,12 @@ import ru.timutkin.tdd.utils.DateFormatHM;
 import java.time.LocalDateTime;
 
 
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "tasks", schema = "public")
 public class TaskEntity {
@@ -26,8 +26,9 @@ public class TaskEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "task_seq")
     Long id;
 
+    @Builder.Default
     @Column(name = "created_at")
-    LocalDateTime createdAt;
+    LocalDateTime createdAt = DateFormatHM.getDateTime();
     @Column(name = "task_name")
     String taskName;
     String message;
@@ -42,9 +43,7 @@ public class TaskEntity {
     @JoinColumn(name = "project_id")
     ProjectEntity project;
 
-
     public TaskEntity(String taskName, String message) {
-        this.createdAt = DateFormatHM.getDateTime();
         this.taskName = taskName;
         this.message = message;
         this.status = Status.OPEN;

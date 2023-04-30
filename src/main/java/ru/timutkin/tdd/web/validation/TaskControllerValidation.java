@@ -3,10 +3,10 @@ package ru.timutkin.tdd.web.validation;
 import lombok.experimental.UtilityClass;
 import ru.timutkin.tdd.dto.TaskDto;
 import ru.timutkin.tdd.enumeration.Status;
-import ru.timutkin.tdd.exception.IncorrectFieldException;
+import ru.timutkin.tdd.exception.validation.IncorrectFieldException;
 
-import ru.timutkin.tdd.exception.IncorrectPathVariableException;
-import ru.timutkin.tdd.exception.IncorrectRequestParamException;
+import ru.timutkin.tdd.exception.validation.IncorrectPathVariableException;
+import ru.timutkin.tdd.exception.validation.IncorrectRequestParamException;
 import ru.timutkin.tdd.web.constant.ValidationConstant;
 import ru.timutkin.tdd.web.handler.error_objects.ApiValidationError;
 import ru.timutkin.tdd.dto.CreationTaskRequest;
@@ -71,7 +71,6 @@ public class TaskControllerValidation {
     }
 
     public static void validateCreate(CreationTaskRequest request) throws IncorrectFieldException {
-
         if (request.getTaskName() == null || request.getTaskName().isBlank()) {
             String message = ValidationConstant.THE_TASK_NAME_SHOULD_NOT_BE_EMPTY_CONSIST_OF_SPACES;
             throw new IncorrectFieldException(
@@ -151,9 +150,9 @@ public class TaskControllerValidation {
                 throw new IncorrectRequestParamException(getApiValidationError(id, exMessage, "userId", id));
             }
         });
-        projectId.ifPresent(id ->{
+        projectId.ifPresent(id -> {
             String exMessage = ValidationConstant.THE_PROJECT_ID_SHOULD_NOT_BE_LESS_OR_EQUAL_0;
-            if (id <= 0){
+            if (id <= 0) {
                 throw new IncorrectRequestParamException(getApiValidationError(id, exMessage, "projectId", id));
             }
         });
