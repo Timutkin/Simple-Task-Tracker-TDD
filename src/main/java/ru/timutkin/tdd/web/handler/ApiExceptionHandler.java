@@ -4,7 +4,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import ru.timutkin.tdd.exception.*;
+import ru.timutkin.tdd.exception.not_found.NotFoundException;
+import ru.timutkin.tdd.exception.not_found.TaskNotFoundException;
+import ru.timutkin.tdd.exception.not_found.UserNotFoundException;
+import ru.timutkin.tdd.exception.validation.IncorrectFieldException;
+import ru.timutkin.tdd.exception.validation.IncorrectPathVariableException;
+import ru.timutkin.tdd.exception.validation.IncorrectRequestParamException;
+import ru.timutkin.tdd.exception.validation.ValidationException;
 import ru.timutkin.tdd.web.handler.error_objects.ApiError;
 
 import java.util.List;
