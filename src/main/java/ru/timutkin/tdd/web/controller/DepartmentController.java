@@ -15,7 +15,7 @@ import ru.timutkin.tdd.web.validation.DepartmentControllerValidation;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @AllArgsConstructor
 @RestController
-@RequestMapping(value = ApiConstant.VERSION_API + "/department",
+@RequestMapping(value = ApiConstant.VERSION_API + "/departments",
         produces = MediaType.APPLICATION_JSON_VALUE
 )
 public class DepartmentController {

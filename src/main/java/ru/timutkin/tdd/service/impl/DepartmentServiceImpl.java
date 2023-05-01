@@ -83,7 +83,19 @@ public class DepartmentServiceImpl implements DepartmentService {
                                         "departmentId", departmentDto.getId() )
                         )
                 );
-        departmentMapper.updateDepartmentEntityFromDepartmentDto(departmentDto, updatedDepartmentEntity);
+        if (departmentDto.getDepartmentHead() != null){
+            UserEntity head = userRepository.findById(departmentDto.getDepartmentHead()).orElseThrow(
+                    () -> new UserNotFoundException(
+                            getApiValidationError(departmentDto.getDepartmentHead(),
+                                    ValidationConstant.USER_WITH_ID_NOT_FOUND.formatted(departmentDto.getDepartmentHead()),
+                                    "headId", departmentDto.getDepartmentHead())
+                    ));
+            updatedDepartmentEntity.setDepartmentHead(head);
+        }
+        if (departmentDto.getName() != null){
+            updatedDepartmentEntity.setName(departmentDto.getName());
+        }
+        departmentRepository.save(updatedDepartmentEntity);
         return departmentMapper.departmentEntityToDepartmentDto(updatedDepartmentEntity);
     }
 

@@ -18,7 +18,7 @@ public class DepartmentEntity {
     @SequenceGenerator(name = "DepartmentEntity_SEQ")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "DepartmentEntity_SEQ")
     Long id;
-
+    @Column(unique = true)
     String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
