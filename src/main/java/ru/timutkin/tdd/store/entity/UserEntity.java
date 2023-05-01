@@ -30,6 +30,7 @@ public class UserEntity {
     @Column(name = "middle_name")
     String middleName;
 
+    @Column(unique = true)
     String email;
 
     @ManyToOne(fetch = FetchType.LAZY)
