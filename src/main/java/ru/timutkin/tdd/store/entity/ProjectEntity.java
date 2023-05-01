@@ -32,7 +32,7 @@ public class ProjectEntity {
 
     @Builder.Default
     @OneToMany(mappedBy = "project")
-    private List<TaskEntity> entityList = new ArrayList<>();
+    private List<TaskEntity> taskEntityList = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     private UserEntity userHead;
