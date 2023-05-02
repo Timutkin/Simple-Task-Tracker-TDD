@@ -1,10 +1,10 @@
 package ru.timutkin.tdd.service.impl;
 
-import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +17,7 @@ import ru.timutkin.tdd.service.ProjectService;
 import ru.timutkin.tdd.store.entity.ProjectEntity;
 import ru.timutkin.tdd.store.entity.TaskEntity;
 import ru.timutkin.tdd.store.entity.UserEntity;
+import ru.timutkin.tdd.store.entity.graph.ProjectEntityGraph;
 import ru.timutkin.tdd.store.repository.ProjectRepository;
 import ru.timutkin.tdd.store.repository.TaskRepository;
 import ru.timutkin.tdd.store.repository.UserRepository;
@@ -24,9 +25,7 @@ import ru.timutkin.tdd.web.constant.ValidationConstant;
 import ru.timutkin.tdd.web.handler.error_objects.ApiValidationError;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static ru.timutkin.tdd.web.handler.error_objects.ApiValidationError.getApiValidationError;
 
@@ -37,13 +36,16 @@ public class ProjectServiceImpl implements ProjectService {
 
     ProjectRepository projectRepository;
 
+    ProjectEntityGraph projectEntityGraph;
+
+    EntityManager entityManager;
+
     UserRepository userRepository;
 
     TaskRepository taskRepository;
 
     ProjectMapper projectMapper;
 
-    EntityManager entityManager;
 
     @Override
     @Transactional(isolation = Isolation.REPEATABLE_READ)
@@ -85,11 +87,9 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public ProjectDto findById(Long projectId) {
-        EntityGraph<ProjectEntity> entityGraph = entityManager.createEntityGraph(ProjectEntity.class);
-        entityGraph.addAttributeNodes("taskEntityList","userHead");
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("javax.persistence.fetchgraph", entityGraph);
-        ProjectEntity project = entityManager.find(ProjectEntity.class, projectId,properties);
+        ProjectEntity project = entityManager.find(ProjectEntity.class, projectId, ProjectEntityGraph.getProperties(
+                projectEntityGraph.getProjectEntityGraphWithTasksAndUserHead()
+        ));
         if (project == null){
             throw new ProjectNotFoundException(
                     ApiValidationError.getApiValidationError(projectId,
@@ -111,5 +111,34 @@ public class ProjectServiceImpl implements ProjectService {
                         "projectId", projectId))
         );
         projectRepository.delete(project);
+    }
+
+    @Override
+    @Retryable(maxAttempts = 2)
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public ProjectDto update(ProjectDto projectDto) {
+        ProjectEntity project = entityManager.find(ProjectEntity.class, projectDto.getId(), ProjectEntityGraph.getProperties(
+                projectEntityGraph.getProjectEntityGraphWithTasksAndUserHead()
+        ));
+        if (project == null){
+            throw  new ProjectNotFoundException(
+                    ApiValidationError.getApiValidationError(projectDto,
+                            ValidationConstant.PROJECT_WITH_ID_NOT_FOUND.formatted(projectDto.getId()),
+                            "projectId", projectDto.getId()));
+        }
+        if (projectDto.getUserHead() != null) {
+            var user = userRepository.findById(projectDto.getUserHead()).orElseThrow(
+                    () -> new UserNotFoundException(
+                            getApiValidationError(projectDto,
+                                    ValidationConstant.USER_WITH_ID_NOT_FOUND.formatted(projectDto.getUserHead()), "headId", projectDto.getUserHead())
+                    )
+            );
+            project.setUserHead(user);
+        }
+        projectMapper.updateProjectEntityFromProjectDto(projectDto, project);
+        ProjectDto updatedProjectDto = projectMapper.projectEntityToProjectDto(project);
+        updatedProjectDto.setTasksId(project.getTaskEntityList().stream().map(TaskEntity::getId).toList());
+        projectRepository.save(project);
+        return updatedProjectDto;
     }
 }

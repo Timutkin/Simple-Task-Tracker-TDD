@@ -10,4 +10,6 @@ public interface ProjectService {
     ProjectDto findById(Long projectId);
 
     void deleteById(Long projectId);
+
+    ProjectDto update(ProjectDto projectDto);
 }

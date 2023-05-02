@@ -54,4 +54,13 @@ public class ProjectController {
                 .body(projectId);
     }
 
+    @PutMapping
+    public ResponseEntity<ProjectDto> update(@RequestBody ProjectDto projectDto){
+        ProjectControllerValidation.validateUpdate(projectDto);
+        ProjectDto updatedProjectDto = projectService.update(projectDto);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(updatedProjectDto);
+    }
+
 }
