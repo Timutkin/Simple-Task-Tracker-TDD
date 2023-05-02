@@ -1,9 +1,7 @@
 package ru.timutkin.tdd.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 
-import org.mapstruct.MappingTarget;
 import ru.timutkin.tdd.dto.TaskDto;
 import ru.timutkin.tdd.store.entity.TaskEntity;
 
@@ -18,5 +16,6 @@ public interface TaskMapper {
 
     TaskEntity taskDtoToTaskEntity(TaskDto task);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateTaskEntityFromTaskDto(TaskDto taskDto, @MappingTarget TaskEntity taskEntity);
 }
