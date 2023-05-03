@@ -26,7 +26,6 @@ public class TaskEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "task_seq")
     Long id;
 
-    @Builder.Default
     @Column(name = "created_at")
     LocalDateTime createdAt = DateFormatHM.getDateTime();
     @Column(name = "task_name")
@@ -48,4 +47,6 @@ public class TaskEntity {
         this.message = message;
         this.status = Status.OPEN;
     }
+
+
 }
