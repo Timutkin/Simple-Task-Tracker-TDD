@@ -37,7 +37,11 @@ public class TaskEntityData {
         return validTaskEntityList;
     }
 
-    public TaskEntity   getFirstValidTaskEntity(){
+    public TaskEntity  getFirstValidTaskEntity(){
         return validTaskEntityList.get(0);
+    }
+
+    public TaskEntity  getSecondValidTaskEntity(){
+        return validTaskEntityList.get(1);
     }
 }

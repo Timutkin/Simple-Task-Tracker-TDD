@@ -44,4 +44,8 @@ public class UserEntityData {
     public  UserEntity getFirstUserEntity(){
         return userEntityList.get(0);
     }
+
+    public  UserEntity getSecondUserEntity(){
+        return userEntityList.get(1);
+    }
 }
