@@ -85,7 +85,7 @@ public class TaskServiceImpl implements TaskService {
             task.setUser(newUser);
         }
         if (taskDto.getProjectId() != null){
-            ProjectEntity newProject = projectRepository.findById(taskDto.getId()).orElseThrow(
+            ProjectEntity newProject = projectRepository.findById(taskDto.getProjectId()).orElseThrow(
                     () -> new ProjectNotFoundException(
                             ApiValidationError.getApiValidationError(taskDto,
                                     ValidationConstant.PROJECT_WITH_ID_NOT_FOUND.formatted(taskDto.getProjectId()),
