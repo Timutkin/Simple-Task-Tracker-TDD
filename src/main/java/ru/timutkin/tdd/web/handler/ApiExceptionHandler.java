@@ -33,7 +33,7 @@ public class ApiExceptionHandler {
                 List.of(exception.getValidationError()),
                 exception.getMessage()
         );
-        return ResponseEntity.badRequest().body(apiError);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(apiError);
     }
 
 
