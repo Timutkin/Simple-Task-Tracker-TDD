@@ -1,6 +1,7 @@
 package ru.timutkin.tdd.web.controller.data;
 
 import lombok.experimental.UtilityClass;
+import ru.timutkin.tdd.store.entity.ProjectEntity;
 import ru.timutkin.tdd.store.entity.TaskEntity;
 import ru.timutkin.tdd.enumeration.Status;
 import ru.timutkin.tdd.utils.DateFormatHM;
@@ -19,14 +20,18 @@ public class TaskEntityData {
                 TaskEntity.builder()
                         .createdAt(DateFormatHM.allTime)
                         .taskName("task1")
+                        .user(UserEntityData.getFirstUserEntity())
                         .message("message")
+                        .project(ProjectEntity.builder().name("Amazing project").build())
                         .status(Status.OPEN)
                         .build()
                 ,
                 TaskEntity.builder()
                         .createdAt(DateFormatHM.allTime)
                         .taskName("task2")
+                        .user(UserEntityData.getSecondUserEntity())
                         .message("message")
+                        .project(ProjectEntity.builder().name("Amazing project").build())
                         .status(Status.OPEN)
                         .build());
 

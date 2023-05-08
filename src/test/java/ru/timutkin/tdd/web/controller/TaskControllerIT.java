@@ -68,6 +68,24 @@ class TaskControllerIT {
     @Autowired
     TaskMapper taskMapper;
 
+
+    public void loadData() {
+        UserEntity firstUser = UserEntityData.getFirstUserEntity();
+        UserEntity secondUser = UserEntityData.getSecondUserEntity();
+        userRepository.save(firstUser);
+        userRepository.save(secondUser);
+        TaskEntity firstTask = TaskEntityData.getFirstValidTaskEntity();
+        TaskEntity secondTask = TaskEntityData.getSecondValidTaskEntity();
+        firstTask.setUser(firstUser);
+        secondTask.setUser(secondUser);
+        ProjectEntity project = ProjectEntity.builder().name("Amazing project").build();
+        firstTask.setProject(project);
+        secondTask.setProject(project);
+        projectRepository.save(project);
+        taskRepository.save(firstTask);
+        taskRepository.save(secondTask);
+    }
+
     /**
      * Testing:
      * POST : /api/v1/tasks
@@ -79,7 +97,7 @@ class TaskControllerIT {
      */
     @Test
     void createTask_TaskIsValid_ReturnsValidResponse() throws Exception {
-        /*
+         /*
         The task is assigned to a user who exists
          */
         UserEntity user = UserEntityData.getFirstUserEntity();
@@ -87,9 +105,9 @@ class TaskControllerIT {
         /*
         Generate expected object - TaskDto task
          */
-        TaskDto task = TaskDtoData.getFirstValidTaskDto();
-        task.setUserId(user.getId());
-        task.setCreatedAt(DateFormatHM.getDateTime());
+        TaskDto taskDto = TaskDtoData.getFirstValidTaskDto();
+        taskDto.setUserId(user.getId());
+        taskDto.setCreatedAt(DateFormatHM.getDateTime());
         /*
         Usually the task refers to a specific project, therefore a project is created
          */
@@ -98,17 +116,14 @@ class TaskControllerIT {
                 .name("Amazing project")
                 .build());
         /*
-        Setting a project to a task object
+        Setting a project to a taskDto object
          */
-        task.setProjectId(1L);
-        /*
-        Generate expected body of response
-         */
-        String jsonTask = jsonConverter.convert(task);
+        taskDto.setProjectId(1L);
+        String jsonTask = jsonConverter.convert(taskDto);
         /*
         Generate creation request
          */
-        CreationTaskRequest request = new CreationTaskRequest(task.getTaskName(), task.getMessage(), task.getUserId(), task.getProjectId());
+        CreationTaskRequest request = new CreationTaskRequest(taskDto.getTaskName(), taskDto.getMessage(), taskDto.getUserId(), taskDto.getProjectId());
         String jsonTaskRequest = jsonConverter.convert(request);
         mvc.perform(post("/api/v1/tasks")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -130,89 +145,105 @@ class TaskControllerIT {
      *
      * @throws Exception the exception
      */
+
     @Test
-    void createTask_TaskIsNonValidUserId_ReturnsBadRequest() throws Exception {
-        /*
-        Creating exceptional situations
-         */
-        CreationTaskRequest first = new CreationTaskRequest("   ", "message", 1L, 1L);
-        CreationTaskRequest second = new CreationTaskRequest("task name", " ", 1L, 1L);
-        CreationTaskRequest third = new CreationTaskRequest("task name", "message", 1L, 1L);
-        CreationTaskRequest fourth = new CreationTaskRequest("task name", "message", 1L, 1L);
-        CreationTaskRequest fifth = new CreationTaskRequest("task name", "message", -1L, 1L);
-        CreationTaskRequest sixth = new CreationTaskRequest("task name", "message", 1L, -1L);
+    void createTask_TaskTaskNameIsBlank_ReturnsBadRequest() throws Exception {
+        CreationTaskRequest request = new CreationTaskRequest("   ", "message", 1L, 1L);
         /*
         Should return BAD_REQUEST because taskName is blank
          */
         mvc.perform(post(ApiConstant.VERSION_API + "/tasks")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonConverter.convert(first))
-                .accept(MediaType.APPLICATION_JSON)
-        ).andExpectAll(
-                status().isBadRequest(),
-                content().contentType(MediaType.APPLICATION_JSON)
-        );
-         /*
-        Should return BAD_REQUEST because message is blank
-         */
-        mvc.perform(post(ApiConstant.VERSION_API + "/tasks")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonConverter.convert(second))
-                .accept(MediaType.APPLICATION_JSON)
-        ).andExpectAll(
-                status().isBadRequest(),
-                content().contentType(MediaType.APPLICATION_JSON)
-        );
-            /*
-        Should return BAD_REQUEST because userId <= 0
-         */
-        mvc.perform(post(ApiConstant.VERSION_API + "/tasks")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonConverter.convert(fifth))
-                .accept(MediaType.APPLICATION_JSON)
-        ).andExpectAll(
-                status().isBadRequest(),
-                content().contentType(MediaType.APPLICATION_JSON)
-        );
-         /*
-        Should return BAD_REQUEST because userId is not found
-         */
-        mvc.perform(post(ApiConstant.VERSION_API + "/tasks")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonConverter.convert(third))
-                .accept(MediaType.APPLICATION_JSON)
-        ).andExpectAll(
-                status().isBadRequest(),
-                content().contentType(MediaType.APPLICATION_JSON)
-        );
-         /*
-        We save the user, otherwise we will get a BAD_REQUEST for this
-        request due to the absence of the user in the database
-         */
-        userRepository.save(UserEntityData.getFirstUserEntity());
-        /*
-        Should return BAD_REQUEST because projectId is not found
-         */
-        mvc.perform(post(ApiConstant.VERSION_API + "/tasks")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonConverter.convert(fourth))
-                .accept(MediaType.APPLICATION_JSON)
-        ).andExpectAll(
-                status().isBadRequest(),
-                content().contentType(MediaType.APPLICATION_JSON)
-        );
-         /*
-        Should return BAD_REQUEST because projectId <= 0
-         */
-        mvc.perform(post(ApiConstant.VERSION_API + "/tasks")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonConverter.convert(sixth))
+                .content(jsonConverter.convert(request))
                 .accept(MediaType.APPLICATION_JSON)
         ).andExpectAll(
                 status().isBadRequest(),
                 content().contentType(MediaType.APPLICATION_JSON)
         );
     }
+
+    @Test
+    void createTask_TaskMessageIsBlank_ReturnsBadRequest() throws Exception {
+        CreationTaskRequest request = new CreationTaskRequest("task name", " ", 1L, 1L);
+        /*
+        Should return BAD_REQUEST because message is blank
+         */
+        mvc.perform(post(ApiConstant.VERSION_API + "/tasks")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonConverter.convert(request))
+                .accept(MediaType.APPLICATION_JSON)
+        ).andExpectAll(
+                status().isBadRequest(),
+                content().contentType(MediaType.APPLICATION_JSON)
+        );
+    }
+
+    @Test
+    void createTask_TaskUserIdIsNonValid_dReturnsBadRequest() throws Exception {
+        CreationTaskRequest request = new CreationTaskRequest("task name", "message", 0L, 1L);
+        /*
+        Should return BAD_REQUEST because userId == 0
+         */
+        mvc.perform(post(ApiConstant.VERSION_API + "/tasks")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonConverter.convert(request))
+                .accept(MediaType.APPLICATION_JSON)
+        ).andExpectAll(
+                status().isBadRequest(),
+                content().contentType(MediaType.APPLICATION_JSON)
+        );
+    }
+
+    @Test
+    void createTask_TaskUserNotFound_ReturnsForbidden() throws Exception {
+        CreationTaskRequest request = new CreationTaskRequest("task name", "message", 10L, 1L);
+        /*
+        Should return FORBIDDEN because userId not found
+         */
+        mvc.perform(post(ApiConstant.VERSION_API + "/tasks")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonConverter.convert(request))
+                .accept(MediaType.APPLICATION_JSON)
+        ).andExpectAll(
+                status().isForbidden(),
+                content().contentType(MediaType.APPLICATION_JSON)
+        );
+    }
+
+    @Test
+    void createTask_TaskProjectIsNonValidReturnsBadRequest() throws Exception {
+        loadData();
+        CreationTaskRequest request = new CreationTaskRequest("task name", "message", 1L, 0L);
+        /*
+        Should return BAD_REQUEST because projectId == 0
+         */
+        mvc.perform(post(ApiConstant.VERSION_API + "/tasks")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonConverter.convert(request))
+                .accept(MediaType.APPLICATION_JSON)
+        ).andExpectAll(
+                status().isBadRequest(),
+                content().contentType(MediaType.APPLICATION_JSON)
+        );
+    }
+
+    @Test
+    void createTask_TaskProjectIdNotFound_ReturnsForbidden() throws Exception {
+        loadData();
+        CreationTaskRequest request = new CreationTaskRequest("task name", "message", 1L, 10L);
+        /*
+        Should return FORBIDDEN because projectId not found
+         */
+        mvc.perform(post(ApiConstant.VERSION_API + "/tasks")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonConverter.convert(request))
+                .accept(MediaType.APPLICATION_JSON)
+        ).andExpectAll(
+                status().isForbidden(),
+                content().contentType(MediaType.APPLICATION_JSON)
+        );
+    }
+
 
     /**
      * Testing:
@@ -224,23 +255,8 @@ class TaskControllerIT {
      */
     @Test
     void findAll_WithoutRequestParam_ReturnValidResponseEntity() throws Exception {
-        /*
-        Filling the database with values :  userEntity - user for all tasks
-                                            first - task, which will be in the database
-                                            second - task, which will be in the database
-         */
-        UserEntity userEntity = UserEntityData.getFirstUserEntity();
-        userRepository.save(userEntity);
-        TaskEntity first = TaskEntityData.getFirstValidTaskEntity();
-        TaskEntity second = TaskEntityData.getSecondValidTaskEntity();
-        first.setUser(userEntity);
-        second.setUser(userEntity);
-        taskRepository.save(first);
-        taskRepository.save(second);
-        /*
-        Generate expected values
-         */
-        List<TaskDto> taskEntityList = List.of(taskMapper.taskEntityToTaskDto(first), taskMapper.taskEntityToTaskDto(second));
+        loadData();
+        List<TaskDto> taskEntityList = List.of(taskMapper.taskEntityToTaskDto(TaskEntityData.getFirstValidTaskEntity()), taskMapper.taskEntityToTaskDto(TaskEntityData.getSecondValidTaskEntity()));
         mvc.perform(get(ApiConstant.VERSION_API + "/tasks"))
                 .andExpectAll(
                         status().isOk(),
@@ -253,31 +269,20 @@ class TaskControllerIT {
     /**
      * Testing:
      * GET : /api/v1/tasks
-     * Find all tasks when parameters passed : after, before .
+     * Find all tasks when parameters passed : after
      * Should return valid response - HTTP code 200 and correct body
      *
      * @throws Exception the exception
      */
+
     @Test
-    void findAll_RequestParamAfterBefore_ReturnsValidResponseEntity() throws Exception {
-        /*
-        Filling the database with values :  userEntity - user for all tasks
-                                            first - task, which will be in the database
-                                            second - task, which will be in the database
-         */
-        UserEntity userEntity = UserEntityData.getFirstUserEntity();
-        userRepository.save(userEntity);
-        TaskEntity first = TaskEntityData.getFirstValidTaskEntity();
-        TaskEntity second = TaskEntityData.getSecondValidTaskEntity();
-        first.setUser(userEntity);
-        second.setUser(userEntity);
-        taskRepository.save(first);
-        taskRepository.save(second);
+    void findAll_RequestParamAfterReturnsValidResponseEntity() throws Exception {
         /*
         Should return task that created after this date : 2023-03-02T00:00
         expected : first, second
          */
-        List<TaskDto> taskEntityList = List.of(taskMapper.taskEntityToTaskDto(first), taskMapper.taskEntityToTaskDto(second));
+        loadData();
+        List<TaskDto> taskEntityList = List.of(taskMapper.taskEntityToTaskDto(TaskEntityData.getFirstValidTaskEntity()), taskMapper.taskEntityToTaskDto(TaskEntityData.getSecondValidTaskEntity()));
         mvc.perform(get(ApiConstant.VERSION_API + "/tasks").param("after", "2023-03-02T00:00"))
                 .andExpectAll(
                         status().isOk(),
@@ -294,6 +299,21 @@ class TaskControllerIT {
                         content().json(jsonConverter.convert(Collections.emptyList())),
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
+    }
+
+    /**
+     * Testing:
+     * GET : /api/v1/tasks
+     * Find all tasks when parameters passed : before
+     * Should return valid response - HTTP code 200 and correct body
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    void findAll_RequestParamBefore_ReturnsValidResponseEntity() throws Exception {
+        loadData();
+        List<TaskDto> taskEntityList = List.of(taskMapper.taskEntityToTaskDto(TaskEntityData.getFirstValidTaskEntity()),
+                taskMapper.taskEntityToTaskDto(TaskEntityData.getSecondValidTaskEntity()));
         /*
         Should return task that created before this date : 2023-03-04T00:00
         expected : first, second
@@ -314,6 +334,26 @@ class TaskControllerIT {
                         content().json(jsonConverter.convert(Collections.emptyList())),
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
+
+    }
+
+    /**
+     * Testing:
+     * GET : /api/v1/tasks
+     * Find all tasks when parameters passed : after and before
+     * Should return valid response - HTTP code 200 and correct body
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    void findAll_RequestParamAfterAndBefore_ReturnsValidResponseEntity() throws Exception {
+        /*
+        Should return task that created after this date : 2023-03-02T00:00
+        expected : first, second
+         */
+        loadData();
+        List<TaskDto> taskEntityList = List.of(taskMapper.taskEntityToTaskDto(TaskEntityData.getFirstValidTaskEntity()),
+                taskMapper.taskEntityToTaskDto(TaskEntityData.getSecondValidTaskEntity()));
         /*
         Should return task that created from interval : 2023-03-02T00:00 <= date <= 2023-03-04T00:00
         expected : first, second
@@ -332,27 +372,15 @@ class TaskControllerIT {
     /**
      * Testing:
      * GET : /api/v1/tasks
-     * Find all tasks when parameters passed : taskName, message .
+     * Find all tasks when parameters passed : taskName
      * Should return valid response - HTTP code 200 and correct body
      *
      * @throws Exception the exception
      */
     @Test
-    void findAll_RequestParamTaskNameMessage_ReturnsValidResponseEntity() throws Exception {
-        /*
-        Filling the database with values :  userEntity - user for all tasks
-                                            first - task, which will be in the database
-                                            second - task, which will be in the database
-         */
-        UserEntity userEntity = UserEntityData.getFirstUserEntity();
-        userRepository.save(userEntity);
-        TaskEntity first = TaskEntityData.getFirstValidTaskEntity();
-        TaskEntity second = TaskEntityData.getSecondValidTaskEntity();
-        first.setUser(userEntity);
-        second.setUser(userEntity);
-        taskRepository.save(first);
-        taskRepository.save(second);
-        List<TaskDto> taskDtoList = List.of(taskMapper.taskEntityToTaskDto(first), taskMapper.taskEntityToTaskDto(second));
+    void findAll_RequestParamTaskName_ReturnsValidResponseEntity() throws Exception {
+        loadData();
+        List<TaskDto> taskDtoList = List.of(taskMapper.taskEntityToTaskDto(TaskEntityData.getFirstValidTaskEntity()), taskMapper.taskEntityToTaskDto(TaskEntityData.getSecondValidTaskEntity()));
         /*
         Should return task that taskName contains : "sk"
         expected : first, second
@@ -373,6 +401,21 @@ class TaskControllerIT {
                         content().json(jsonConverter.convert(Collections.emptyList())),
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
+    }
+
+
+    /**
+     * Testing:
+     * GET : /api/v1/tasks
+     * Find all tasks when parameters passed : message
+     * Should return valid response - HTTP code 200 and correct body
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    void findAll_RequestParamMessage_ReturnsValidResponseEntity() throws Exception {
+        loadData();
+        List<TaskDto> taskDtoList = List.of(taskMapper.taskEntityToTaskDto(TaskEntityData.getFirstValidTaskEntity()), taskMapper.taskEntityToTaskDto(TaskEntityData.getSecondValidTaskEntity()));
          /*
         Should return task that message contains : "ssa"
         expected : first, second
@@ -393,6 +436,19 @@ class TaskControllerIT {
                         content().json(jsonConverter.convert(Collections.emptyList())),
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
+    }
+
+    /**
+     * Testing:
+     * GET : /api/v1/tasks
+     * Find all tasks when parameters passed : taskName, message
+     * Should return valid response - HTTP code 200 and correct body
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    void findAll_RequestParamTaskNameMessage_ReturnsValidResponseEntity() throws Exception {
+        loadData();
         /*
         Should return task that message contains "www" and taskName contains "2"
         expected : second
@@ -403,7 +459,7 @@ class TaskControllerIT {
                 )
                 .andExpectAll(
                         status().isOk(),
-                        content().json(jsonConverter.convert(List.of(taskMapper.taskEntityToTaskDto(second)))),
+                        content().json(jsonConverter.convert(List.of(taskMapper.taskEntityToTaskDto(TaskEntityData.getSecondValidTaskEntity())))),
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
     }
@@ -418,18 +474,43 @@ class TaskControllerIT {
      */
     @Test
     void findAll_RequestParamStatusUserId_ReturnsValidResponseEntity() throws Exception {
-        UserEntity userEntity = UserEntityData.getFirstUserEntity();
-        userRepository.save(userEntity);
-        TaskEntity first = TaskEntityData.getFirstValidTaskEntity();
-        TaskEntity second = TaskEntityData.getSecondValidTaskEntity();
-        first.setUser(userEntity);
-        second.setUser(userEntity);
-        taskRepository.save(first);
-        taskRepository.save(second);
-        List<TaskDto> taskDtoList = List.of(taskMapper.taskEntityToTaskDto(first), taskMapper.taskEntityToTaskDto(second));
+        /*
+        Should return task that status is OPEN and userId is 1L
+        expected : TaskEntityData.getFirstValidTaskEntity()
+        */
+        loadData();
+        mvc.perform(get(ApiConstant.VERSION_API + "/tasks")
+                        .param("status", "OPEN")
+                        .param("userId", String.valueOf(1L))
+                )
+                .andExpectAll(
+                        status().isOk(),
+                        content().json(jsonConverter.convert(List.of(taskMapper.taskEntityToTaskDto(TaskEntityData.getFirstValidTaskEntity())))),
+                        content().contentType(MediaType.APPLICATION_JSON)
+                );
+        /*
+        Should return task that status is OPEN and userId is 10L
+        expected : []
+        */
+        mvc.perform(get(ApiConstant.VERSION_API + "/tasks")
+                        .param("status", "OPEN")
+                        .param("userId", String.valueOf(10L))
+                )
+                .andExpectAll(
+                        status().isOk(),
+                        content().json(jsonConverter.convert(Collections.emptyList())),
+                        content().contentType(MediaType.APPLICATION_JSON)
+                );
+    }
+
+    @Test
+    void findAll_RequestParamStatus_ReturnsValidResponseEntity() throws Exception {
+        loadData();
+        List<TaskDto> taskDtoList = List.of(taskMapper.taskEntityToTaskDto(TaskEntityData.getFirstValidTaskEntity()),
+                taskMapper.taskEntityToTaskDto(TaskEntityData.getSecondValidTaskEntity()));
         /*
         Should return task that status is OPEN
-        expected : first, second
+        expected : TaskEntityData.getFirstValidTaskEntity(), TaskEntityData.getSecondValidTaskEntity()
         */
         mvc.perform(get(ApiConstant.VERSION_API + "/tasks").param("status", "OPEN"))
                 .andExpectAll(
@@ -447,32 +528,7 @@ class TaskControllerIT {
                         content().json(jsonConverter.convert(Collections.emptyList())),
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
-             /*
-        Should return task that status is OPEN and userId is 1L
-        expected : first, second
-        */
-        mvc.perform(get(ApiConstant.VERSION_API + "/tasks")
-                        .param("status", "OPEN")
-                        .param("userId", String.valueOf(1L))
-                )
-                .andExpectAll(
-                        status().isOk(),
-                        content().json(jsonConverter.convert(taskDtoList)),
-                        content().contentType(MediaType.APPLICATION_JSON)
-                );
-        /*
-        Should return task that status is OPEN and userId is 2L
-        expected : []
-        */
-        mvc.perform(get(ApiConstant.VERSION_API + "/tasks")
-                        .param("status", "OPEN")
-                        .param("userId", String.valueOf(2L))
-                )
-                .andExpectAll(
-                        status().isOk(),
-                        content().json(jsonConverter.convert(Collections.emptyList())),
-                        content().contentType(MediaType.APPLICATION_JSON)
-                );
+
     }
 
     /**
@@ -491,29 +547,16 @@ class TaskControllerIT {
                                             second - task, which will be in the database
                                             project
          */
-        UserEntity userEntity = UserEntityData.getFirstUserEntity();
-        userRepository.save(userEntity);
-        TaskEntity first = TaskEntityData.getFirstValidTaskEntity();
-        TaskEntity second = TaskEntityData.getSecondValidTaskEntity();
-        first.setUser(userEntity);
-        second.setUser(userEntity);
-        taskRepository.save(first);
-        taskRepository.save(second);
-        ProjectEntity project = ProjectEntity
-                .builder()
-                .name("Amazing project")
-                .build();
-        projectRepository.save(project);
-        first.setProject(project);
-        second.setProject(project);
-        taskRepository.save(first);
-        taskRepository.save(second);
-        List<TaskDto> taskDtoList = List.of(taskMapper.taskEntityToTaskDto(first), taskMapper.taskEntityToTaskDto(second));
+        loadData();
+        List<TaskDto> taskDtoList = List.of(taskMapper.taskEntityToTaskDto(TaskEntityData.getFirstValidTaskEntity()),
+                taskMapper.taskEntityToTaskDto(TaskEntityData.getSecondValidTaskEntity()));
         /*
         Should return task that projectId is 1
         expected : first, second
         */
-        mvc.perform(get(ApiConstant.VERSION_API + "/tasks").param("projectId", String.valueOf(project.getId())))
+        mvc.perform(get(ApiConstant.VERSION_API + "/tasks").param("projectId", String.valueOf(
+                        TaskEntityData.getFirstValidTaskEntity().getProject().getId()
+                )))
                 .andExpectAll(
                         status().isOk(),
                         content().json(jsonConverter.convert(taskDtoList)),
@@ -534,15 +577,15 @@ class TaskControllerIT {
     /**
      * Testing:
      * POST : /api/v1/tasks
-     * params : after, before, taskName, message, userId, projectId
-     * Should return valid response - HTTP code 400
+     * params : after, before, taskName, message, userId, projectId - non valid or not found
+     * Should return valid response - HTTP code 400 or 403
      * The response body is not being tested
      *
      * @throws Exception the exception
      */
     @Test
-    void findAll_RequestParamIsNonValid_ReturnValidResponseEntity() throws Exception {
-        /*
+    void findAll_RequestParamIsNonValidAfterAndBefore_ReturnValidResponseEntity() throws Exception {
+            /*
         Should return BAD_REQUEST because after format is non valid
          */
         mvc.perform(get(ApiConstant.VERSION_API + "/tasks").param("after", LocalDateTime.now().toString()))
@@ -558,7 +601,11 @@ class TaskControllerIT {
                         status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
-          /*
+    }
+
+    @Test
+    void findAll_RequestParamIsNonValidTaskName_ReturnValidResponseEntity() throws Exception {
+        /*
         Should return BAD_REQUEST because taskName is blank
          */
         mvc.perform(get(ApiConstant.VERSION_API + "/tasks").param("taskName", ""))
@@ -566,6 +613,10 @@ class TaskControllerIT {
                         status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
+    }
+
+    @Test
+    void findAll_RequestParamIsNonValidMessage_ReturnValidResponseEntity() throws Exception {
         /*
         Should return BAD_REQUEST because message is blank
          */
@@ -574,6 +625,10 @@ class TaskControllerIT {
                         status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
+    }
+
+    @Test
+    void findAll_RequestParamIsNonValidStatus_ReturnValidResponseEntity() throws Exception {
         /*
         Should return BAD_REQUEST because status is not OPEN
          */
@@ -582,18 +637,14 @@ class TaskControllerIT {
                         status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
+    }
+
+    @Test
+    void findAll_RequestParamIsNonValid_ReturnValidResponseEntity() throws Exception {
             /*
         Should return BAD_REQUEST because userId <= 0
          */
         mvc.perform(get(ApiConstant.VERSION_API + "/tasks").param("userId", String.valueOf(-1L)))
-                .andExpectAll(
-                        status().isBadRequest(),
-                        content().contentType(MediaType.APPLICATION_JSON)
-                );
-        /*
-        Should return BAD_REQUEST because userId not found
-         */
-        mvc.perform(get(ApiConstant.VERSION_API + "/tasks").param("userId", String.valueOf(10L)))
                 .andExpectAll(
                         status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON)
@@ -610,36 +661,17 @@ class TaskControllerIT {
      */
     @Test
     void updateTask_TaskIsValid_ReturnsValidResponseEntity() throws Exception {
-        /*
-        Filling the database with values :  firstUserEntity - user for first tasks
-                                            secondUserEntity - user for update
-                                            task - task to update
-                                            firstProject - project got firstTask
-                                            secondProject - project to update
-         */
-        UserEntity firstUserEntity = UserEntityData.getFirstUserEntity();
-        UserEntity secondUserEntity = UserEntityData.getSecondUserEntity();
-        userRepository.save(firstUserEntity);
-        userRepository.save(secondUserEntity);
-        TaskEntity task = TaskEntityData.getFirstValidTaskEntity();
-        ProjectEntity firstProject = ProjectEntity
-                .builder()
-                .name("Amazing project")
-                .build();
-        ProjectEntity secondProject = ProjectEntity
+        loadData();
+        ProjectEntity newProject = ProjectEntity
                 .builder()
                 .name("Awesome project")
                 .build();
-        projectRepository.save(firstProject);
-        projectRepository.save(secondProject);
-        task.setUser(firstUserEntity);
-        task.setProject(firstProject);
-        taskRepository.save(task);
+        projectRepository.save(newProject);
         /*
         expected value : updatedTaskDto
          */
         TaskDto updatedTaskDto = new TaskDto(1L, DateFormatHM.allTime, "new task",
-                "new message", "CLOSED", secondUserEntity.getId(), secondProject.getId());
+                "new message", "CLOSED", UserEntityData.getSecondUserEntity().getId(), newProject.getId());
         mvc.perform(put(ApiConstant.VERSION_API + "/tasks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonConverter.convert(updatedTaskDto))
@@ -662,120 +694,170 @@ class TaskControllerIT {
      *
      * @throws Exception the exception
      */
-    @Test
-    void updateTask_TaskIsNonValid_ReturnsValidResponseEntity() throws Exception {
-        TaskDto first = TaskDto.builder().id(0L).build();
-        TaskDto second = TaskDto.builder().id(1L).createdAt(LocalDateTime.now()).build();
-        TaskDto third = TaskDto.builder().id(1L).taskName("  ").build();
-        TaskDto fourth = TaskDto.builder().id(1L).message(" ").build();
-        TaskDto fifth = TaskDto.builder().id(1L).status("open").build();
-        TaskDto sixth = TaskDto.builder().id(1L).userId(0L).build();
-        TaskDto seventh = TaskDto.builder().id(1L).userId(-1L).build();
-        TaskDto eighth = TaskDto.builder().id(1L).userId(1L).projectId(5L).build();
-        TaskDto ninth = TaskDto.builder().id(1L).userId(1L).projectId(-1L).build();
 
+    @Test
+    void updateTask_TaskIdIsNonValid_ReturnBadRequest() throws Exception {
+        TaskDto task = TaskDto.builder().id(0L).taskName("amazing task").build();
         /*
-        Should return BAD_REQUEST because id is null
+        Should return BAD_REQUEST because id <= 0
          */
         mvc.perform(put(ApiConstant.VERSION_API + "/tasks")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonConverter.convert(first))
+                        .content(jsonConverter.convert(task))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpectAll(
                         status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
-        TaskEntity task = TaskEntityData.getFirstValidTaskEntity();
-        UserEntity user = UserEntityData.getFirstUserEntity();
-        userRepository.save(user);
-        task.setUser(user);
-        taskRepository.save(task);
-          /*
+    }
+
+    @Test
+    void updateTask_TaskIdNotFound_ReturnForbidden() throws Exception {
+        TaskDto task = TaskDto.builder().id(10L).id(1L).taskName("crazy task").build();
+        /*
+        Should return FORBIDDEN because id is not found
+         */
+        mvc.perform(put(ApiConstant.VERSION_API + "/tasks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonConverter.convert(task))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpectAll(
+                        status().isForbidden(),
+                        content().contentType(MediaType.APPLICATION_JSON)
+                );
+    }
+
+    @Test
+    void updateTask_TaskIdIsNull_ReturnBadRequest() throws Exception {
+        TaskDto taskDto = TaskDto.builder().taskName("amazing task").build();
+        /*
         Should return BAD_REQUEST because createdAt format is non valid
          */
         mvc.perform(put(ApiConstant.VERSION_API + "/tasks")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonConverter.convert(second))
+                        .content(jsonConverter.convert(taskDto))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpectAll(
                         status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
+    }
+
+    @Test
+    void updateTask_TaskTaskNameIsBlank_ReturnBadRequest() throws Exception {
+        loadData();
+        TaskDto taskDto = TaskDto.builder().id(1L).taskName("   ").build();
         /*
         Should return BAD_REQUEST because taskName is blank
          */
         mvc.perform(put(ApiConstant.VERSION_API + "/tasks")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonConverter.convert(third))
+                        .content(jsonConverter.convert(taskDto))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpectAll(
                         status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
+    }
+
+    @Test
+    void updateTask_TasMessageIsBlank_ReturnBadRequest() throws Exception {
+        loadData();
+        TaskDto taskDto = TaskDto.builder().id(1L).message("   ").build();
         /*
         Should return BAD_REQUEST because message is blank
          */
         mvc.perform(put(ApiConstant.VERSION_API + "/tasks")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonConverter.convert(fourth))
+                        .content(jsonConverter.convert(taskDto))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpectAll(
                         status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
+    }
+
+    @Test
+    void updateTask_TaskStatusIsNonValid_ReturnBadRequest() throws Exception {
+        loadData();
+        TaskDto taskDto = TaskDto.builder().id(1L).status("open").build();
         /*
-        Should return BAD_REQUEST because status is open (correct : OPEN)
+        Should return BAD_REQUEST because status is non valid
          */
         mvc.perform(put(ApiConstant.VERSION_API + "/tasks")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonConverter.convert(fifth))
+                        .content(jsonConverter.convert(taskDto))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpectAll(
                         status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
-          /*
-        Should return BAD_REQUEST because userId <= 0
-         */
-        mvc.perform(put(ApiConstant.VERSION_API + "/tasks")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonConverter.convert(sixth))
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpectAll(
-                        status().isBadRequest(),
-                        content().contentType(MediaType.APPLICATION_JSON)
-                );
-          /*
-        Should return BAD_REQUEST because userId not found
-         */
-        mvc.perform(put(ApiConstant.VERSION_API + "/tasks")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonConverter.convert(seventh))
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpectAll(
-                        status().isBadRequest(),
-                        content().contentType(MediaType.APPLICATION_JSON)
-                );
+    }
+
+    @Test
+    void updateTask_TaskUserIdIsNonValid_ReturnBadRequest() throws Exception {
+        loadData();
+        TaskDto taskDto = TaskDto.builder().id(1L).userId(0L).build();
         /*
-        Should return BAD_REQUEST because projectId not found
-        */
+        Should return BAD_REQUEST userId == 0
+         */
         mvc.perform(put(ApiConstant.VERSION_API + "/tasks")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonConverter.convert(eighth))
+                        .content(jsonConverter.convert(taskDto))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpectAll(
                         status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
-          /*
-        Should return BAD_REQUEST because projectId <= 0
-        */
+    }
+
+    @Test
+    void updateTask_TaskUserIdNotFound_ReturnForbidden() throws Exception {
+        loadData();
+        TaskDto taskDto = TaskDto.builder().id(1L).userId(10L).build();
+        /*
+        Should return FORBIDDEN because userId not found
+         */
         mvc.perform(put(ApiConstant.VERSION_API + "/tasks")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonConverter.convert(ninth))
+                        .content(jsonConverter.convert(taskDto))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpectAll(
+                        status().isForbidden(),
+                        content().contentType(MediaType.APPLICATION_JSON)
+                );
+    }
+
+    @Test
+    void updateTask_TaskProjectIdIsNonValid_ReturnBadRequest() throws Exception {
+        loadData();
+        TaskDto taskDto = TaskDto.builder().id(1L).projectId(0L).build();
+        /*
+        Should return BAD_REQUEST because projectId == 0
+         */
+        mvc.perform(put(ApiConstant.VERSION_API + "/tasks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonConverter.convert(taskDto))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpectAll(
                         status().isBadRequest(),
+                        content().contentType(MediaType.APPLICATION_JSON)
+                );
+    }
+
+    @Test
+    void updateTask_TaskProjectIdNotFound_ReturnForbidden() throws Exception {
+        loadData();
+        TaskDto taskDto = TaskDto.builder().id(1L).projectId(10L).build();
+        /*
+        Should return FORBIDDEN because projectId not found
+         */
+        mvc.perform(put(ApiConstant.VERSION_API + "/tasks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonConverter.convert(taskDto))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpectAll(
+                        status().isForbidden(),
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
     }
@@ -785,6 +867,7 @@ class TaskControllerIT {
      * DELETE : /api/v1/tasks
      * path variable : taskId
      * Should return valid response - HTTP code 200 and valid response
+     *
      * @throws Exception the exception
      */
     @Test
@@ -810,11 +893,12 @@ class TaskControllerIT {
      * path variable : projectId - <=0 or not found
      * Should return valid response - HTTP code 400
      * The response body is not being tested
+     *
      * @throws Exception the exception
      */
     @Test
     void deleteById_TaskIdIsNonValid_ReturnsBadRequest() throws Exception {
-        Long firstTaskId = 1L;
+        Long firstTaskId = 10L;
         Long secondTaskId = 0L;
         /*
         Should return BAD_REQUEST because projectId not found
@@ -823,11 +907,11 @@ class TaskControllerIT {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpectAll(
-                        status().isBadRequest(),
+                        status().isForbidden(),
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
         /*
-        Should return BAD_REQUEST because projectId <= 0
+        Should return BAD_REQUEST because projectId == 0
         */
         mvc.perform(delete(ApiConstant.VERSION_API + "/tasks/{taskID}", secondTaskId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -844,50 +928,93 @@ class TaskControllerIT {
      * path variable : taskID
      * Find tasks by id.
      * Should return valid response - HTTP code 200 and correct body
+     *
      * @throws Exception the exception
      */
     @Test
     void findById_TaskIdIsValid_ReturnsValidResponseEntity() throws Exception {
-        userRepository.save(UserEntityData.getFirstUserEntity());
-        TaskEntity task = TaskEntityData.getFirstValidTaskEntity();
-        task.setUser(UserEntityData.getFirstUserEntity());
-        taskRepository.save(task);
-        mvc.perform(get(ApiConstant.VERSION_API + "/tasks/{taskId}", task.getId())
+        loadData();
+        TaskDto expectedTask = taskMapper.taskEntityToTaskDto(TaskEntityData.getFirstValidTaskEntity());
+        mvc.perform(get(ApiConstant.VERSION_API + "/tasks/{taskId}", expectedTask.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpectAll(
                         status().isOk(),
                         content().contentType(MediaType.APPLICATION_JSON),
-                        content().json(jsonConverter.convert(taskMapper.taskEntityToTaskDto(task)))
+                        content().json(jsonConverter.convert(expectedTask))
                 );
     }
 
     /**
      * Testing:
      * GET : /api/v1/tasks
-     * path variable : taskID not found
+     * path variable : taskID not found or <= 0
      * Find all tasks by id.
-     * Should return valid response - HTTP code 400
+     * Should return valid response - HTTP code 400 or 403
      * The response body is not being tested
+     *
      * @throws Exception the exception
      */
     @Test
     void findById_TaskIdIsNonValid_ReturnsValidResponseEntity() throws Exception {
         Long taskId = 1L;
           /*
-        Should return BAD_REQUEST because taskId not found
+        Should return FORBIDDEN because taskId not found
         */
         mvc.perform(get(ApiConstant.VERSION_API + "/tasks/{taskId}", taskId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpectAll(
-                        status().isBadRequest(),
+                        status().isForbidden(),
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
         /*
         Should return BAD_REQUEST because taskId <= 0
         */
         mvc.perform(get(ApiConstant.VERSION_API + "/tasks/{taskId}", String.valueOf(-1L))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpectAll(
+                        status().isBadRequest(),
+                        content().contentType(MediaType.APPLICATION_JSON)
+                );
+    }
+
+    /**
+     * Testing:
+     * GET : /api/v1/tasks/user/{userId}
+     * path variable : taskID
+     * Find all tasks by userId
+     * Should return valid response - HTTP code 200 and correct ResponseEntity
+     *
+     * @throws Exception the exception
+     */
+
+    @Test
+    void findListOfTaskEntityByUserId_UserIdIsValid_ReturnsValidResponseEntity() throws Exception {
+        loadData();
+        mvc.perform(get(ApiConstant.VERSION_API + "/tasks/user/{userId}", TaskEntityData.getFirstValidTaskEntity().getUser().getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpectAll(
+                        status().isOk(),
+                        content().contentType(MediaType.APPLICATION_JSON),
+                        content().json(jsonConverter.convert(List.of(taskMapper.taskEntityToTaskDto(TaskEntityData.getFirstValidTaskEntity()))))
+                );
+    }
+
+    /**
+     * Testing:
+     * GET : /api/v1/tasks/user/{userId}
+     * path variable : userId  <= 0
+     * Should return valid response - HTTP code 400
+     * The response body is not being tested
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    void findListOfTaskEntityByUserId_UserIdIsNonValid_ReturnsValidResponseEntity() throws Exception {
+        mvc.perform(get(ApiConstant.VERSION_API + "/tasks/user/{userId}", String.valueOf(0L))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpectAll(
