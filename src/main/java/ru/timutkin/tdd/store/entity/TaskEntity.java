@@ -34,11 +34,11 @@ public class TaskEntity {
     @Enumerated(EnumType.STRING)
     Status status;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = {CascadeType.PERSIST})
     @JoinColumn(name = "user_id")
     UserEntity user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     @JoinColumn(name = "project_id")
     ProjectEntity project;
 
@@ -48,5 +48,14 @@ public class TaskEntity {
         this.status = Status.OPEN;
     }
 
-
+    @Override
+    public String toString() {
+        return "TaskEntity{" +
+               "id=" + id +
+               ", createdAt=" + createdAt +
+               ", taskName='" + taskName + '\'' +
+               ", message='" + message + '\'' +
+               ", status=" + status +
+               '}';
+    }
 }
