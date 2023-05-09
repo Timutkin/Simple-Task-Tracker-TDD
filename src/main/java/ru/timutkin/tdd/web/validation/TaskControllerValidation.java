@@ -2,6 +2,7 @@ package ru.timutkin.tdd.web.validation;
 
 import lombok.experimental.UtilityClass;
 import ru.timutkin.tdd.dto.TaskDto;
+import ru.timutkin.tdd.dto.param.FilterTaskParams;
 import ru.timutkin.tdd.enumeration.Status;
 import ru.timutkin.tdd.exception.validation.IncorrectFieldException;
 
@@ -107,36 +108,33 @@ public class TaskControllerValidation {
         }
     }
 
-    public static void validateFilter(Optional<LocalDateTime> after, Optional<LocalDateTime> before,
-                                      Optional<String> taskName, Optional<String> message,
-                                      Optional<String> status, Optional<Long> userId,
-                                      Optional<Long> projectId) {
+    public static void validateFilter(FilterTaskParams filterTaskParams) {
 
-        after.ifPresent(localDateTime -> {
+        filterTaskParams.after().ifPresent(localDateTime -> {
             String exMessage = ValidationConstant.CORRECT_DATA_FORMAT;
             if (!DataValidation.validate(localDateTime)) {
                 throw new IncorrectRequestParamException(getApiValidationError(localDateTime, exMessage, "after", localDateTime));
             }
         });
-        before.ifPresent(localDateTime -> {
+        filterTaskParams.before().ifPresent(localDateTime -> {
             String exMessage = ValidationConstant.CORRECT_DATA_FORMAT;
             if (!DataValidation.validate(localDateTime)) {
                 throw new IncorrectRequestParamException(getApiValidationError(localDateTime, exMessage, "before", localDateTime));
             }
         });
-        taskName.ifPresent(name -> {
+        filterTaskParams.taskName().ifPresent(name -> {
             String exMessage = ValidationConstant.THE_TASK_NAME_SHOULD_NOT_BE_EMPTY_CONSIST_OF_SPACES;
             if (name.isBlank()) {
                 throw new IncorrectRequestParamException(getApiValidationError(name, exMessage, "taskName", name));
             }
         });
-        message.ifPresent(mess -> {
+        filterTaskParams.message().ifPresent(mess -> {
             String exMessage = ValidationConstant.THE_MESSAGE_SHOULD_NOT_BE_EMPTY_CONSIST_OF_SPACES;
             if (mess.isBlank()) {
                 throw new IncorrectRequestParamException(getApiValidationError(mess, exMessage, "message", mess));
             }
         });
-        status.ifPresent(stat -> {
+        filterTaskParams.status().ifPresent(stat -> {
             String exMessage = ValidationConstant.VALUES_OPEN_IN_PROGRESS_RESOLVED_REOPENED_CLOSED;
             if (!(stat.equals(Status.OPEN.toString()) || stat.equals(Status.IN_PROGRESS.toString()) ||
                   stat.equals(Status.REOPENED.toString()) || stat.equals(Status.RESOLVED.toString()) ||
@@ -144,13 +142,13 @@ public class TaskControllerValidation {
                 throw new IncorrectRequestParamException(getApiValidationError(stat, exMessage, "status", stat));
             }
         });
-        userId.ifPresent(id -> {
+        filterTaskParams.userId().ifPresent(id -> {
             String exMessage = ValidationConstant.THE_ID_SHOULD_NOT_BE_NULL_OR_LESS_OR_EQUAL_0;
             if (id <= 0) {
                 throw new IncorrectRequestParamException(getApiValidationError(id, exMessage, "userId", id));
             }
         });
-        projectId.ifPresent(id -> {
+        filterTaskParams.projectId().ifPresent(id -> {
             String exMessage = ValidationConstant.THE_PROJECT_ID_SHOULD_NOT_BE_LESS_OR_EQUAL_0;
             if (id <= 0) {
                 throw new IncorrectRequestParamException(getApiValidationError(id, exMessage, "projectId", id));

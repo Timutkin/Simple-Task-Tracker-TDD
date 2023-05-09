@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.timutkin.tdd.dto.TaskDto;
+import ru.timutkin.tdd.dto.param.FilterTaskParams;
 import ru.timutkin.tdd.exception.not_found.ProjectNotFoundException;
 import ru.timutkin.tdd.store.entity.ProjectEntity;
 import ru.timutkin.tdd.store.entity.TaskEntity;
@@ -128,11 +129,9 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public List<TaskDto> findByParam(Optional<LocalDateTime> after, Optional<LocalDateTime> before,
-                                     Optional<String> taskName, Optional<String> message,
-                                     Optional<String> status, Optional<Long> userId, Optional<Long> projectId) {
+    public List<TaskDto> findByParam(FilterTaskParams filterTaskParams) {
         return taskRepository.findAll(
-                Specification.where(TaskSpecification.filterTasks(after, before, taskName, message, status, userId, projectId))
+                Specification.where(TaskSpecification.filterTasks(filterTaskParams))
         ).stream().map(taskMapper::taskEntityToTaskDto).toList();
     }
 

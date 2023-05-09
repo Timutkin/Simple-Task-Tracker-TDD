@@ -3,6 +3,7 @@ package ru.timutkin.tdd.service;
 
 import ru.timutkin.tdd.dto.TaskDto;
 import ru.timutkin.tdd.dto.CreationTaskRequest;
+import ru.timutkin.tdd.dto.param.FilterTaskParams;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,9 +18,7 @@ public interface TaskService {
 
     TaskDto findById(Long taskId);
 
-    List<TaskDto> findByParam(Optional<LocalDateTime> after, Optional<LocalDateTime> before,
-                              Optional<String> taskName, Optional<String> message,
-                              Optional<String> status, Optional<Long> userId, Optional<Long> projectId);
+    List<TaskDto> findByParam(FilterTaskParams filterTaskParams);
 
     List<TaskDto> findListOfTaskByUserId(Long userId);
 }

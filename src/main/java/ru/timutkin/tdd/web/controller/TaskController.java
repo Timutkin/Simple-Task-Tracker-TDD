@@ -6,6 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.timutkin.tdd.dto.TaskDto;
+import ru.timutkin.tdd.dto.param.FilterTaskParams;
 import ru.timutkin.tdd.service.TaskService;
 import ru.timutkin.tdd.web.constant.ApiConstant;
 import ru.timutkin.tdd.dto.CreationTaskRequest;
@@ -62,8 +63,9 @@ public class TaskController {
                                                         @RequestParam(name = "userId") Optional<Long> userId,
                                                         @RequestParam(name = "projectId") Optional<Long> projectId
     ) {
-        TaskControllerValidation.validateFilter(after, before, taskName, message, status, userId, projectId);
-        List<TaskDto> taskDtoList = taskService.findByParam(after, before, taskName, message, status, userId, projectId);
+        FilterTaskParams filterParams = new FilterTaskParams(after, before, taskName, message, status, userId, projectId);
+        TaskControllerValidation.validateFilter(filterParams);
+        List<TaskDto> taskDtoList = taskService.findByParam(filterParams);
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(taskDtoList);
