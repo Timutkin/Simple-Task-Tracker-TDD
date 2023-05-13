@@ -147,7 +147,7 @@ class TaskControllerIT {
      */
 
     @Test
-    void createTask_TaskTaskNameIsBlank_ReturnsBadRequest() throws Exception {
+    void createTask_TaskTaskNameIsBlank_ShouldReturnBadRequest() throws Exception {
         CreationTaskRequest request = new CreationTaskRequest("   ", "message", 1L, 1L);
         /*
         Should return BAD_REQUEST because taskName is blank
@@ -163,7 +163,7 @@ class TaskControllerIT {
     }
 
     @Test
-    void createTask_TaskMessageIsBlank_ReturnsBadRequest() throws Exception {
+    void createTask_TaskMessageIsBlank_ShouldReturnBadRequest() throws Exception {
         CreationTaskRequest request = new CreationTaskRequest("task name", " ", 1L, 1L);
         /*
         Should return BAD_REQUEST because message is blank
@@ -179,7 +179,7 @@ class TaskControllerIT {
     }
 
     @Test
-    void createTask_TaskUserIdIsNonValid_dReturnsBadRequest() throws Exception {
+    void createTask_TaskUserIdIsNonValid_ShouldReturnBadRequest() throws Exception {
         CreationTaskRequest request = new CreationTaskRequest("task name", "message", 0L, 1L);
         /*
         Should return BAD_REQUEST because userId == 0
@@ -195,23 +195,23 @@ class TaskControllerIT {
     }
 
     @Test
-    void createTask_TaskUserNotFound_ReturnsForbidden() throws Exception {
+    void createTask_TaskUserNotFound_ShouldReturnBadRequest() throws Exception {
         CreationTaskRequest request = new CreationTaskRequest("task name", "message", 10L, 1L);
         /*
-        Should return FORBIDDEN because userId not found
+        Should return BAD_REQUEST because userId not found
          */
         mvc.perform(post(ApiConstant.VERSION_API + "/tasks")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonConverter.convert(request))
                 .accept(MediaType.APPLICATION_JSON)
         ).andExpectAll(
-                status().isForbidden(),
+                status().isBadRequest(),
                 content().contentType(MediaType.APPLICATION_JSON)
         );
     }
 
     @Test
-    void createTask_TaskProjectIsNonValidReturnsBadRequest() throws Exception {
+    void createTask_TaskProjectIsNonValid_ShouldReturnBadRequest() throws Exception {
         loadData();
         CreationTaskRequest request = new CreationTaskRequest("task name", "message", 1L, 0L);
         /*
@@ -228,18 +228,18 @@ class TaskControllerIT {
     }
 
     @Test
-    void createTask_TaskProjectIdNotFound_ReturnsForbidden() throws Exception {
+    void createTask_TaskProjectIdNotFound_ShouldReturnsBadRequest() throws Exception {
         loadData();
         CreationTaskRequest request = new CreationTaskRequest("task name", "message", 1L, 10L);
         /*
-        Should return FORBIDDEN because projectId not found
+        Should return BAD_REQUEST because projectId not found
          */
         mvc.perform(post(ApiConstant.VERSION_API + "/tasks")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonConverter.convert(request))
                 .accept(MediaType.APPLICATION_JSON)
         ).andExpectAll(
-                status().isForbidden(),
+                status().isBadRequest(),
                 content().contentType(MediaType.APPLICATION_JSON)
         );
     }
@@ -578,13 +578,13 @@ class TaskControllerIT {
      * Testing:
      * POST : /api/v1/tasks
      * params : after, before, taskName, message, userId, projectId - non valid or not found
-     * Should return valid response - HTTP code 400 or 403
+     * Should return valid response - HTTP code 400
      * The response body is not being tested
      *
      * @throws Exception the exception
      */
     @Test
-    void findAll_RequestParamIsNonValidAfterAndBefore_ReturnValidResponseEntity() throws Exception {
+    void findAll_RequestParamIsNonValidAfterAndBefore_ShouldReturnBadRequest() throws Exception {
             /*
         Should return BAD_REQUEST because after format is non valid
          */
@@ -604,7 +604,7 @@ class TaskControllerIT {
     }
 
     @Test
-    void findAll_RequestParamIsNonValidTaskName_ReturnValidResponseEntity() throws Exception {
+    void findAll_RequestParamIsNonValidTaskName_ShouldReturnBadRequest() throws Exception {
         /*
         Should return BAD_REQUEST because taskName is blank
          */
@@ -616,7 +616,7 @@ class TaskControllerIT {
     }
 
     @Test
-    void findAll_RequestParamIsNonValidMessage_ReturnValidResponseEntity() throws Exception {
+    void findAll_RequestParamIsNonValidMessage_ShouldReturnBadRequest() throws Exception {
         /*
         Should return BAD_REQUEST because message is blank
          */
@@ -628,7 +628,7 @@ class TaskControllerIT {
     }
 
     @Test
-    void findAll_RequestParamIsNonValidStatus_ReturnValidResponseEntity() throws Exception {
+    void findAll_RequestParamIsNonValidStatus_ShouldReturnBadRequest() throws Exception {
         /*
         Should return BAD_REQUEST because status is not OPEN
          */
@@ -640,7 +640,7 @@ class TaskControllerIT {
     }
 
     @Test
-    void findAll_RequestParamIsNonValid_ReturnValidResponseEntity() throws Exception {
+    void findAll_RequestParamIsNonValid_ShouldReturnBadRequest() throws Exception {
             /*
         Should return BAD_REQUEST because userId <= 0
          */
@@ -696,7 +696,7 @@ class TaskControllerIT {
      */
 
     @Test
-    void updateTask_TaskIdIsNonValid_ReturnBadRequest() throws Exception {
+    void updateTask_TaskIdIsNonValid_ShouldReturnBadRequest() throws Exception {
         TaskDto task = TaskDto.builder().id(0L).taskName("amazing task").build();
         /*
         Should return BAD_REQUEST because id <= 0
@@ -712,17 +712,17 @@ class TaskControllerIT {
     }
 
     @Test
-    void updateTask_TaskIdNotFound_ReturnForbidden() throws Exception {
+    void updateTask_TaskIdNotFound_ShouldReturnBadRequest() throws Exception {
         TaskDto task = TaskDto.builder().id(10L).id(1L).taskName("crazy task").build();
         /*
-        Should return FORBIDDEN because id is not found
+        Should return BAD_REQUEST because id is not found
          */
         mvc.perform(put(ApiConstant.VERSION_API + "/tasks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonConverter.convert(task))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpectAll(
-                        status().isForbidden(),
+                        status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
     }
@@ -812,18 +812,18 @@ class TaskControllerIT {
     }
 
     @Test
-    void updateTask_TaskUserIdNotFound_ReturnForbidden() throws Exception {
+    void updateTask_TaskUserIdNotFound_ShouldReturnBadRequest() throws Exception {
         loadData();
         TaskDto taskDto = TaskDto.builder().id(1L).userId(10L).build();
         /*
-        Should return FORBIDDEN because userId not found
+        Should return BAD_REQUEST because userId not found
          */
         mvc.perform(put(ApiConstant.VERSION_API + "/tasks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonConverter.convert(taskDto))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpectAll(
-                        status().isForbidden(),
+                        status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
     }
@@ -846,18 +846,18 @@ class TaskControllerIT {
     }
 
     @Test
-    void updateTask_TaskProjectIdNotFound_ReturnForbidden() throws Exception {
+    void updateTask_TaskProjectIdNotFound_ShouldReturnBadRequest() throws Exception {
         loadData();
         TaskDto taskDto = TaskDto.builder().id(1L).projectId(10L).build();
         /*
-        Should return FORBIDDEN because projectId not found
+        Should return BAD_REQUEST because projectId not found
          */
         mvc.perform(put(ApiConstant.VERSION_API + "/tasks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonConverter.convert(taskDto))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpectAll(
-                        status().isForbidden(),
+                        status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
     }
@@ -907,7 +907,7 @@ class TaskControllerIT {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpectAll(
-                        status().isForbidden(),
+                        status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
         /*
@@ -950,13 +950,13 @@ class TaskControllerIT {
      * GET : /api/v1/tasks
      * path variable : taskID not found or <= 0
      * Find all tasks by id.
-     * Should return valid response - HTTP code 400 or 403
+     * Should return valid response - HTTP code 400
      * The response body is not being tested
      *
      * @throws Exception the exception
      */
     @Test
-    void findById_TaskIdIsNonValid_ReturnsValidResponseEntity() throws Exception {
+    void findById_TaskIdIsNonValid_ShouldReturnsBadRequest() throws Exception {
         Long taskId = 1L;
           /*
         Should return FORBIDDEN because taskId not found
@@ -965,7 +965,7 @@ class TaskControllerIT {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpectAll(
-                        status().isForbidden(),
+                        status().isBadRequest(),
                         content().contentType(MediaType.APPLICATION_JSON)
                 );
         /*

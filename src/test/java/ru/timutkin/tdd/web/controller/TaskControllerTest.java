@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import ru.timutkin.tdd.dto.TaskDto;
+import ru.timutkin.tdd.dto.param.FilterTaskParams;
 import ru.timutkin.tdd.exception.validation.IncorrectFieldException;
 import ru.timutkin.tdd.exception.validation.IncorrectPathVariableException;
 import ru.timutkin.tdd.exception.validation.IncorrectRequestParamException;
@@ -163,11 +164,18 @@ class TaskControllerTest {
 
     @Test
     void findAllByParam_TaskFindParamIsValid_ReturnsValidResponseEntity() {
-        when(this.taskService.findByParam(Optional.of(DateFormatHM.allTime), Optional.of(DateFormatHM.allTime),
-                Optional.of("taskName"), Optional.of("message"), Optional.of("OPEN"), Optional.of(1L), Optional.empty()))
+        when(this.taskService.findByParam(FilterTaskParams.builder()
+                        .after(Optional.of(DateFormatHM.allTime))
+                        .before(Optional.of(DateFormatHM.allTime))
+                        .taskName(Optional.of("taskName"))
+                        .message(Optional.of("message"))
+                        .status(Optional.of("OPEN"))
+                        .userId(Optional.of(1L))
+                        .projectId(Optional.of(1L))
+                .build()))
                 .thenReturn(TaskDtoData.getValidListTaskDto());
         var response = controller.findAllByParam(Optional.of(DateFormatHM.allTime), Optional.of(DateFormatHM.allTime),
-                Optional.of("taskName"), Optional.of("message"), Optional.of("OPEN"), Optional.of(1L),Optional.empty());
+                Optional.of("taskName"), Optional.of("message"), Optional.of("OPEN"), Optional.of(1L),Optional.of(1L));
         assertAll(
                 () -> assertNotNull(response),
                 () -> assertEquals(HttpStatus.OK, response.getStatusCode()),
