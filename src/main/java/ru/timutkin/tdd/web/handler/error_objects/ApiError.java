@@ -1,6 +1,7 @@
 package ru.timutkin.tdd.web.handler.error_objects;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,11 @@ public class ApiError {
     private String message;
 
     private String debugMessage;
+
+    @Schema(
+            description = "List of api sub errors",
+            oneOf = {ApiValidationError.class}
+    )
     private List<ApiSubError> subErrors;
 
     private ApiError() {

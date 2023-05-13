@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import ru.timutkin.tdd.exception.not_found.*;
 import ru.timutkin.tdd.exception.validation.IncorrectFieldException;
 import ru.timutkin.tdd.exception.validation.IncorrectPathVariableException;
@@ -16,6 +17,7 @@ import java.util.List;
 @ControllerAdvice
 public class ApiExceptionHandler {
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(value = {IncorrectFieldException.class, IncorrectPathVariableException.class, IncorrectRequestParamException.class})
     protected ResponseEntity<ApiError> handleValidationException(ValidationException exception){
         ApiError apiError = new ApiError(
@@ -25,15 +27,15 @@ public class ApiExceptionHandler {
         );
         return ResponseEntity.badRequest().body(apiError);
     }
-
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(value = {TaskNotFoundException.class, UserNotFoundException.class, ProjectNotFoundException.class, DepartmentNotFoundException.class})
     protected ResponseEntity<ApiError> handleNotFoundException(NotFoundException exception){
         ApiError apiError = new ApiError(
-                HttpStatus.FORBIDDEN,
+                HttpStatus.BAD_REQUEST,
                 List.of(exception.getValidationError()),
                 exception.getMessage()
         );
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(apiError);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
     }
 
 
