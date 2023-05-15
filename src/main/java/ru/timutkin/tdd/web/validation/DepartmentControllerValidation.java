@@ -16,7 +16,7 @@ public class DepartmentControllerValidation {
 
     public static void validateCreate(String name, Long headId) {
         if (name == null || name.isBlank()){
-            String message = ValidationConstant.THE_TASK_NAME_SHOULD_NOT_BE_EMPTY_CONSIST_OF_SPACES;
+            String message = ValidationConstant.THE_DEPARTMENT_NAME_NOT_BE_EMPTY_CONSIST_OF_SPACES;
             throw new IncorrectRequestParamException(
                     getApiValidationError(name, message, "name",name)
             );
