@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "tasks", schema = "public")
+@Table(name = "tasks", schema = "public", uniqueConstraints = {@UniqueConstraint(columnNames = {"task_name", "message"})})
 public class TaskEntity {
 
     @Id
@@ -26,11 +26,13 @@ public class TaskEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "task_seq")
     Long id;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     LocalDateTime createdAt = DateFormatHM.getDateTime();
-    @Column(name = "task_name")
+    @Column(name = "task_name", nullable = false)
     String taskName;
+    @Column(nullable = false)
     String message;
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     Status status;
 
@@ -38,7 +40,7 @@ public class TaskEntity {
     @JoinColumn(name = "user_id")
     UserEntity user;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST}, optional = false)
     @JoinColumn(name = "project_id")
     ProjectEntity project;
 
