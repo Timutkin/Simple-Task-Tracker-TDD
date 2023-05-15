@@ -5,6 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import ru.timutkin.tdd.exception.already_exists.AlreadyExistsException;
+import ru.timutkin.tdd.exception.already_exists.TaskAlreadyExistsException;
 import ru.timutkin.tdd.exception.not_found.*;
 import ru.timutkin.tdd.exception.validation.IncorrectFieldException;
 import ru.timutkin.tdd.exception.validation.IncorrectPathVariableException;
@@ -38,6 +40,15 @@ public class ApiExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
     }
 
-
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(value = {TaskAlreadyExistsException.class})
+    protected ResponseEntity<ApiError> handleAlreadyExistsException(AlreadyExistsException exception){
+        ApiError apiError = new ApiError(
+                HttpStatus.CONFLICT,
+                List.of(exception.getValidationError()),
+                exception.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(apiError);
+    }
 
 }

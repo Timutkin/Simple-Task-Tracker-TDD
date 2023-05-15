@@ -6,27 +6,26 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import ru.timutkin.tdd.dto.CreationTaskRequest;
 import ru.timutkin.tdd.dto.TaskDto;
 import ru.timutkin.tdd.dto.param.FilterTaskParams;
+import ru.timutkin.tdd.exception.already_exists.TaskAlreadyExistsException;
 import ru.timutkin.tdd.exception.not_found.ProjectNotFoundException;
-import ru.timutkin.tdd.store.entity.ProjectEntity;
-import ru.timutkin.tdd.store.entity.TaskEntity;
-import ru.timutkin.tdd.store.entity.UserEntity;
 import ru.timutkin.tdd.exception.not_found.TaskNotFoundException;
 import ru.timutkin.tdd.exception.not_found.UserNotFoundException;
 import ru.timutkin.tdd.mapper.TaskMapper;
+import ru.timutkin.tdd.service.TaskService;
+import ru.timutkin.tdd.store.entity.ProjectEntity;
+import ru.timutkin.tdd.store.entity.TaskEntity;
+import ru.timutkin.tdd.store.entity.UserEntity;
 import ru.timutkin.tdd.store.repository.ProjectRepository;
 import ru.timutkin.tdd.store.repository.TaskRepository;
 import ru.timutkin.tdd.store.repository.UserRepository;
 import ru.timutkin.tdd.store.repository.specifiction.TaskSpecification;
-import ru.timutkin.tdd.service.TaskService;
 import ru.timutkin.tdd.web.constant.ValidationConstant;
 import ru.timutkin.tdd.web.handler.error_objects.ApiValidationError;
-import ru.timutkin.tdd.dto.CreationTaskRequest;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 
 @AllArgsConstructor
@@ -44,6 +43,14 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public TaskDto save(CreationTaskRequest taskRequest) {
+        if (taskRepository.findByTaskNameAndAndMessage(taskRequest.getTaskName(), taskRequest.getMessage())) {
+            throw new TaskAlreadyExistsException(
+                    ApiValidationError.getApiValidationError(taskRequest,
+                            ValidationConstant.THE_TASK_WITH_NAME_AND_MESSAGE_ALREADY_EXISTS.formatted(
+                                    taskRequest.getTaskName(), taskRequest.getMessage()),
+                            "name/message", taskRequest.getUserId())
+            );
+        }
         TaskEntity taskEntity = new TaskEntity(taskRequest.getTaskName(), taskRequest.getMessage());
         taskEntity.setUser(
                 userRepository.findById(taskRequest.getUserId()).orElseThrow(
