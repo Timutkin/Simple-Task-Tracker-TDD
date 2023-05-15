@@ -43,8 +43,15 @@ public class TaskController {
                     @ApiResponse(responseCode = "400",
                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = ApiError.class)),
-                            description = "Validation error : task name or message is blank, user id or project id not found "
-                    )})
+                            description = "Validation error: the task name or message is empty, the user or project ID is not found, " +
+                                          "or the task with the name and message already exists "
+                    ),
+                    @ApiResponse(responseCode = "409",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = ApiError.class)),
+                            description = "Task with name and message already exists"
+                    ),
+            })
     @PostMapping
     public ResponseEntity<TaskDto> createTask(@RequestBody CreationTaskRequest request) {
         TaskControllerValidation.validateCreate(request);
