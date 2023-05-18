@@ -244,6 +244,24 @@ class TaskControllerIT {
         );
     }
 
+    @Test
+    void createTask_TaskTaskNameAndMessageAlreadyExists_ShouldReturnConflict() throws Exception {
+        loadData();
+        CreationTaskRequest request = new CreationTaskRequest(TaskEntityData.getFirstValidTaskEntity().getTaskName(),
+                TaskEntityData.getFirstValidTaskEntity().getMessage(), 1L, 1L);
+        /*
+        Should return CONFLICT because Task with message and name already exists
+         */
+        mvc.perform(post(ApiConstant.VERSION_API + "/tasks")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonConverter.convert(request))
+                .accept(MediaType.APPLICATION_JSON)
+        ).andExpectAll(
+                status().isConflict(),
+                content().contentType(MediaType.APPLICATION_JSON)
+        );
+    }
+
 
     /**
      * Testing:
