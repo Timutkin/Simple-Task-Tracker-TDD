@@ -11,6 +11,8 @@ public class ValidationConstant {
     public static final String DEPARTMENT_WITH_ID_NOT_FOUND = "Department with id = %d not found";
 
     public static final String THE_TASK_WITH_NAME_AND_MESSAGE_ALREADY_EXISTS = "Task with name = %s and message = %s already exists";
+
+    public static final String THE_PROJECT_WITH_NAME_ALREADY_EXIST = "Task project name = %s ";
     public static final String THE_ID_SHOULD_NOT_BE_LESS_OR_EQUAL_0 = "The id should not be <= 0";
     public static final String THE_PROJECT_ID_SHOULD_NOT_BE_LESS_OR_EQUAL_0 = "The project id should not be <= 0";
     public static final String THE_DEPARTMENT_ID_SHOULD_NOT_BE_LESS_OR_EQUAL_0 = "The department id should not be <= 0";

@@ -1,9 +1,5 @@
 package ru.timutkin.tdd.web.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -14,8 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.timutkin.tdd.dto.ProjectDto;
 import ru.timutkin.tdd.service.ProjectService;
 import ru.timutkin.tdd.web.constant.ApiConstant;
-import ru.timutkin.tdd.web.constant.SwaggerDescription;
-import ru.timutkin.tdd.web.handler.error_objects.ApiError;
 import ru.timutkin.tdd.web.validation.ProjectControllerValidation;
 
 import java.util.List;
@@ -30,23 +24,12 @@ public class ProjectController {
 
     ProjectService projectService;
 
-    @Operation(summary = "Create an project", description = SwaggerDescription.CREATE_PROJECT,
-            responses = {
-                    @ApiResponse(responseCode = "200",
-                            description = "The project was successfully created "
-                    ),
-                    @ApiResponse(responseCode = "400",
-                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ApiError.class)),
-                            description = "Validation error : project name is blank, user id or task id found "
-                    )})
     @PostMapping
-    public ResponseEntity<ProjectDto> createProject(@RequestParam(name = "name") String name,
-                                                    @RequestParam(name = "userHead", required = false) Long userHead,
-                                                    @RequestParam(name = "tasksId", required = false) List<Long> tasksId
+    public ResponseEntity<ProjectDto> create(@RequestParam(name = "name") String name,
+                                             @RequestParam(name = "userHead", required = false) Long userHead
     ) {
-        ProjectControllerValidation.validateCreate(name, userHead,tasksId);
-        ProjectDto projectDto = projectService.create(name, userHead, tasksId);
+        ProjectControllerValidation.validateCreate(name, userHead);
+        ProjectDto projectDto = projectService.create(name, userHead);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(projectDto);

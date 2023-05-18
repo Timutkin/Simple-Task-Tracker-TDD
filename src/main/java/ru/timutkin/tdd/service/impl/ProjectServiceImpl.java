@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.timutkin.tdd.dto.ProjectDto;
+import ru.timutkin.tdd.exception.already_exists.ProjectAlreadyExistsException;
 import ru.timutkin.tdd.exception.not_found.ProjectNotFoundException;
-import ru.timutkin.tdd.exception.not_found.TaskNotFoundException;
 import ru.timutkin.tdd.exception.not_found.UserNotFoundException;
 import ru.timutkin.tdd.mapper.ProjectMapper;
 import ru.timutkin.tdd.service.ProjectService;
@@ -19,13 +19,9 @@ import ru.timutkin.tdd.store.entity.TaskEntity;
 import ru.timutkin.tdd.store.entity.UserEntity;
 import ru.timutkin.tdd.store.entity.graph.ProjectEntityGraph;
 import ru.timutkin.tdd.store.repository.ProjectRepository;
-import ru.timutkin.tdd.store.repository.TaskRepository;
 import ru.timutkin.tdd.store.repository.UserRepository;
 import ru.timutkin.tdd.web.constant.ValidationConstant;
 import ru.timutkin.tdd.web.handler.error_objects.ApiValidationError;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static ru.timutkin.tdd.web.handler.error_objects.ApiValidationError.getApiValidationError;
 
@@ -42,17 +38,19 @@ public class ProjectServiceImpl implements ProjectService {
 
     UserRepository userRepository;
 
-    TaskRepository taskRepository;
-
     ProjectMapper projectMapper;
-
 
     @Override
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public ProjectDto create(String name, Long userHead, List<Long> tasksId) {
+    public ProjectDto create(String name, Long userHead) {
+        if (!projectRepository.existsByName(name)){
+            throw new ProjectAlreadyExistsException(
+                    getApiValidationError(name,
+                            ValidationConstant.THE_PROJECT_WITH_NAME_ALREADY_EXIST.formatted(name), "name", name)
+            );
+        }
         ProjectEntity project = new ProjectEntity();
         UserEntity user = null;
-        List<TaskEntity> taskEntityList = new ArrayList<>();
         if (userHead != null) {
             user = userRepository.findById(userHead).orElseThrow(
                     () -> new UserNotFoundException(
@@ -61,22 +59,7 @@ public class ProjectServiceImpl implements ProjectService {
                     )
             );
         }
-        if (tasksId != null) {
-            tasksId.forEach( taskId -> {
-                        var task  = taskRepository.findById(taskId).orElseThrow(
-                                () -> new TaskNotFoundException(ApiValidationError.builder()
-                                        .rejectedValue(taskId)
-                                        .message(ValidationConstant.TASK_WITH_ID_NOT_FOUND.formatted(taskId))
-                                        .field("tasksId")
-                                        .build())
-                        );
-                        taskEntityList.add(task);
-                    }
-            );
-
-        }
         project.setUserHead(user);
-        project.setTaskEntityList(taskEntityList);
         project.setName(name);
         projectRepository.save(project);
         ProjectDto projectDto = projectMapper.projectEntityToProjectDto(project);

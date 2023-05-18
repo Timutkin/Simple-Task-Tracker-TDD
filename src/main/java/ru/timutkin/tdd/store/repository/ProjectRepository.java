@@ -6,4 +6,5 @@ import ru.timutkin.tdd.store.entity.ProjectEntity;
 
 @Repository
 public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
+    boolean existsByName(String name);
 }

@@ -14,7 +14,7 @@ import static ru.timutkin.tdd.web.handler.error_objects.ApiValidationError.getAp
 
 @UtilityClass
 public class ProjectControllerValidation {
-    public static void validateCreate(String name, Long userHead, List<Long> tasksId) {
+    public static void validateCreate(String name, Long userHead) {
         if (name == null || name.isBlank()) {
             String message = ValidationConstant.THE_PROJECT_NAME_NOT_BE_EMPTY_CONSIST_OF_SPACES;
             throw new IncorrectRequestParamException(
@@ -26,16 +26,6 @@ public class ProjectControllerValidation {
             throw new IncorrectRequestParamException(
                     getApiValidationError(userHead, message, "userHead", userHead)
             );
-        }
-        if (tasksId != null) {
-            tasksId.forEach(taskId -> {
-                if (taskId <= 0) {
-                    String message = ValidationConstant.THE_ID_SHOULD_NOT_BE_LESS_OR_EQUAL_0;
-                    throw new IncorrectRequestParamException(
-                            getApiValidationError(taskId, message, "tasksId", taskId)
-                    );
-                }
-            });
         }
     }
 
