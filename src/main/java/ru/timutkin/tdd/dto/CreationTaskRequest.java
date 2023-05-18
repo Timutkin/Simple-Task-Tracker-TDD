@@ -21,6 +21,7 @@ public class CreationTaskRequest {
     @NotBlank
     @NotNull
     String message;
+    @JsonProperty("user_id")
     @NotNull
     Long userId;
     @JsonProperty("project_id")

@@ -85,7 +85,7 @@ public class TaskControllerValidation {
             );
         }
         if (request.getUserId() == null || request.getUserId() <= 0) {
-            String message = ValidationConstant.THE_USER_ID_SHOULD_NOT_BE_LESS_OR_EQUAL_0;
+            String message = ValidationConstant.THE_ID_SHOULD_NOT_BE_NULL_OR_LESS_OR_EQUAL_0;
             throw new IncorrectFieldException(
                     getApiValidationError(request, message, "userId", request.getUserId())
             );

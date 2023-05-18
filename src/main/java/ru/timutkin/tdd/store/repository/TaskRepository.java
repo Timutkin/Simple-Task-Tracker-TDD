@@ -16,6 +16,6 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Long>, JpaSpec
     @Query("SELECT t FROM TaskEntity t WHERE t.user.id = :userId")
     List<TaskEntity> findTaskEntityByUserId(@Param("userId") Long id);
 
-    boolean findByTaskNameAndAndMessage(String taskName,
-                                        String message);
+    boolean existsByMessageAndTaskName(String message, String taskName);
+
 }

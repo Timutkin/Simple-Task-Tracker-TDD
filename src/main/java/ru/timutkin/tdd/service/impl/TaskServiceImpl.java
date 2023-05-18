@@ -43,12 +43,12 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public TaskDto save(CreationTaskRequest taskRequest) {
-        if (taskRepository.findByTaskNameAndAndMessage(taskRequest.getTaskName(), taskRequest.getMessage())) {
+        if (taskRepository.existsByMessageAndTaskName(taskRequest.getMessage(), taskRequest.getTaskName())) {
             throw new TaskAlreadyExistsException(
                     ApiValidationError.getApiValidationError(taskRequest,
                             ValidationConstant.THE_TASK_WITH_NAME_AND_MESSAGE_ALREADY_EXISTS.formatted(
                                     taskRequest.getTaskName(), taskRequest.getMessage()),
-                            "name/message", taskRequest.getUserId())
+                            "name/message", taskRequest.getTaskName() + "/" + taskRequest.getMessage())
             );
         }
         TaskEntity taskEntity = new TaskEntity(taskRequest.getTaskName(), taskRequest.getMessage());
@@ -83,7 +83,7 @@ public class TaskServiceImpl implements TaskService {
                                 "id", taskDto.getId())
                 )
         );
-        if (taskDto.getUserId() != null){
+        if (taskDto.getUserId() != null) {
             UserEntity newUser = userRepository.findById(taskDto.getUserId()).orElseThrow(
                     () -> new UserNotFoundException(
                             ApiValidationError.getApiValidationError(taskDto,
@@ -92,7 +92,7 @@ public class TaskServiceImpl implements TaskService {
             );
             task.setUser(newUser);
         }
-        if (taskDto.getProjectId() != null){
+        if (taskDto.getProjectId() != null) {
             ProjectEntity newProject = projectRepository.findById(taskDto.getProjectId()).orElseThrow(
                     () -> new ProjectNotFoundException(
                             ApiValidationError.getApiValidationError(taskDto,
