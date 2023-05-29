@@ -15,6 +15,10 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@NamedEntityGraph(name = "project-with-tasks-and-userHead", attributeNodes = {
+        @NamedAttributeNode("taskEntityList"),
+        @NamedAttributeNode("userHead")}
+)
 @Entity
 @Table(name = "project", schema = "public")
 public class ProjectEntity {
