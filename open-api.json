@@ -108,6 +108,16 @@
                 }
               }
             }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
         }
       },
@@ -148,6 +158,16 @@
                 }
               }
             }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
         }
       },
@@ -180,7 +200,17 @@
             }
           },
           "400": {
-            "description": "Validation error : task name or message is blank, user id or project id not found ",
+            "description": "Validation error: the task name or message is empty, the user or project ID is not found, or the task with the name and message already exists ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Task with name and message already exists",
             "content": {
               "application/json": {
                 "schema": {
@@ -197,6 +227,8 @@
         "tags": [
           "project-controller"
         ],
+        "summary": "Update an project",
+        "description": "The method accepts an object of the TaskDTO class, which must contain the task identifier, as well as valid data: not empty sequences for text fields, identifiers larger than zero, they must also be in the system,data format : uuuu-MM-dd'T'HH:mm",
         "operationId": "update",
         "requestBody": {
           "content": {
@@ -210,7 +242,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "The project was successfully updated ",
             "content": {
               "application/json": {
                 "schema": {
@@ -220,9 +252,19 @@
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Validation error : project id not found or <= 0, project name is blank, user id <= 0 or not found, incorrect data format (valid format:uuuu-MM-dd'T'HH:mm)",
             "content": {
-              "*/*": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Project with this name already exists",
+            "content": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiError"
                 }
@@ -235,7 +277,8 @@
         "tags": [
           "project-controller"
         ],
-        "operationId": "create",
+        "summary": "Create an project",
+        "operationId": "createProject",
         "parameters": [
           {
             "name": "name",
@@ -248,28 +291,16 @@
           {
             "name": "userHead",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "integer",
               "format": "int64"
-            }
-          },
-          {
-            "name": "tasksId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "integer",
-                "format": "int64"
-              }
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "The project was successfully created",
             "content": {
               "application/json": {
                 "schema": {
@@ -279,9 +310,19 @@
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Validation error: the project name is blank, or the user id <=",
             "content": {
-              "*/*": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Project with this name already exists",
+            "content": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiError"
                 }
@@ -327,6 +368,16 @@
                 }
               }
             }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
         }
       },
@@ -334,7 +385,7 @@
         "tags": [
           "department-controller"
         ],
-        "operationId": "create_1",
+        "operationId": "create",
         "parameters": [
           {
             "name": "name",
@@ -367,6 +418,16 @@
           },
           "400": {
             "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
             "content": {
               "*/*": {
                 "schema": {
@@ -416,6 +477,16 @@
                 }
               }
             }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
         }
       },
@@ -452,6 +523,16 @@
             "description": "Validation error : The id should not be null or <= 0",
             "content": {
               "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiError"
                 }
@@ -502,6 +583,16 @@
                 }
               }
             }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
         }
       }
@@ -511,6 +602,7 @@
         "tags": [
           "project-controller"
         ],
+        "summary": "Get an project",
         "operationId": "findById_1",
         "parameters": [
           {
@@ -525,7 +617,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "The project was successfully received ",
             "content": {
               "application/json": {
                 "schema": {
@@ -535,7 +627,17 @@
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Validation error : The id should not be null or <= 0",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
             "content": {
               "*/*": {
                 "schema": {
@@ -550,6 +652,7 @@
         "tags": [
           "project-controller"
         ],
+        "summary": "Delete an task",
         "operationId": "deleteById_1",
         "parameters": [
           {
@@ -564,7 +667,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "The project was successfully deleted ",
             "content": {
               "application/json": {
                 "schema": {
@@ -575,7 +678,17 @@
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Validation error : The id should not be null or <= 0",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
             "content": {
               "*/*": {
                 "schema": {
@@ -624,6 +737,16 @@
                 }
               }
             }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
         }
       },
@@ -657,6 +780,16 @@
           },
           "400": {
             "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
             "content": {
               "*/*": {
                 "schema": {
@@ -871,19 +1004,19 @@
           "message",
           "project_id",
           "task_name",
-          "userId"
+          "user_id"
         ],
         "type": "object",
         "properties": {
           "message": {
             "type": "string"
           },
-          "userId": {
-            "type": "integer",
-            "format": "int64"
-          },
           "task_name": {
             "type": "string"
+          },
+          "user_id": {
+            "type": "integer",
+            "format": "int64"
           },
           "project_id": {
             "type": "integer",
