@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Random;
 
 
-@UtilityClass
 public class UserEntityData {
 
     private static final List<UserEntity> userEntityList = new ArrayList<>();
@@ -31,7 +30,7 @@ public class UserEntityData {
         );
     }
 
-    private final Random random = new Random();
+    private static final Random random = new Random();
 
     public static List<UserEntity> getListOfUserEntity(){
         return userEntityList;
@@ -41,11 +40,11 @@ public class UserEntityData {
         return userEntityList.get(random.nextInt(0, userEntityList.size()-1));
     }
 
-    public  UserEntity getFirstUserEntity(){
+    public static   UserEntity getFirstUserEntity(){
         return userEntityList.get(0);
     }
 
-    public  UserEntity getSecondUserEntity(){
+    public static UserEntity getSecondUserEntity(){
         return userEntityList.get(1);
     }
 }
