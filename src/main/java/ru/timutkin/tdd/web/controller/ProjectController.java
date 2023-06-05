@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.timutkin.tdd.dto.ProjectDto;
 import ru.timutkin.tdd.service.ProjectService;
 import ru.timutkin.tdd.web.constant.ApiConstant;
-import ru.timutkin.tdd.web.constant.SwaggerDescription;
 import ru.timutkin.tdd.web.constant.ValidationConstant;
 import ru.timutkin.tdd.web.handler.error_objects.ApiError;
 import ru.timutkin.tdd.web.validation.ProjectControllerValidation;
@@ -33,7 +32,7 @@ public class ProjectController {
 
     @Operation(summary = "Create an project",
             responses = {
-                    @ApiResponse(responseCode = "200",
+                    @ApiResponse(responseCode = "201",
                             description = "The project was successfully created"
                     ),
                     @ApiResponse(responseCode = "400",
@@ -96,7 +95,7 @@ public class ProjectController {
                 .body(projectId);
     }
 
-    @Operation(summary = "Update an project", description = SwaggerDescription.UPDATE_TASK,
+    @Operation(summary = "Update an project",
             responses = {
                     @ApiResponse(responseCode = "200",
                             description = "The project was successfully updated "

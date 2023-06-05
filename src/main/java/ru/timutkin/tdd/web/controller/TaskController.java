@@ -37,7 +37,7 @@ public class TaskController {
 
     @Operation(summary = "Create an task", description = SwaggerDescription.CREATE_TASK,
             responses = {
-                    @ApiResponse(responseCode = "200",
+                    @ApiResponse(responseCode = "201",
                             description = "The task was successfully created "
                     ),
                     @ApiResponse(responseCode = "400",

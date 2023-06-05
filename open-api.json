@@ -1,3 +1,4 @@
+
 {
   "openapi": "3.0.1",
   "info": {
@@ -189,7 +190,7 @@
           "required": true
         },
         "responses": {
-          "200": {
+          "201": {
             "description": "The task was successfully created ",
             "content": {
               "application/json": {
@@ -225,10 +226,9 @@
     "/api/v1/projects": {
       "put": {
         "tags": [
-          "project-controller"
+          "Project management APIs"
         ],
         "summary": "Update an project",
-        "description": "The method accepts an object of the TaskDTO class, which must contain the task identifier, as well as valid data: not empty sequences for text fields, identifiers larger than zero, they must also be in the system,data format : uuuu-MM-dd'T'HH:mm",
         "operationId": "update",
         "requestBody": {
           "content": {
@@ -275,7 +275,7 @@
       },
       "post": {
         "tags": [
-          "project-controller"
+          "Project management APIs"
         ],
         "summary": "Create an project",
         "operationId": "createProject",
@@ -299,7 +299,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "201": {
             "description": "The project was successfully created",
             "content": {
               "application/json": {
@@ -335,8 +335,10 @@
     "/api/v1/departments": {
       "put": {
         "tags": [
-          "department-controller"
+          "Department management APIs"
         ],
+        "summary": "Update an department",
+        "description": "The method accepts an object of the TaskDTO class, which must contain the task identifier, as well as valid data: not empty sequences for text fields, identifiers larger than zero, they must also be in the system,data format : uuuu-MM-dd'T'HH:mm",
         "operationId": "updateDepartment",
         "requestBody": {
           "content": {
@@ -350,7 +352,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "The department was successfully updated ",
             "content": {
               "application/json": {
                 "schema": {
@@ -360,9 +362,9 @@
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Validation error : department id not found or <= 0, department name is blank, head id <= 0 or not found.",
             "content": {
-              "*/*": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiError"
                 }
@@ -383,8 +385,9 @@
       },
       "post": {
         "tags": [
-          "department-controller"
+          "Department management APIs"
         ],
+        "summary": "Create an Department",
         "operationId": "create",
         "parameters": [
           {
@@ -406,8 +409,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK",
+          "201": {
+            "description": "The department was successfully created ",
             "content": {
               "application/json": {
                 "schema": {
@@ -417,9 +420,9 @@
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Validation error: the department name is empty, the headId is not found. ",
             "content": {
-              "*/*": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiError"
                 }
@@ -600,7 +603,7 @@
     "/api/v1/projects/{projectId}": {
       "get": {
         "tags": [
-          "project-controller"
+          "Project management APIs"
         ],
         "summary": "Get an project",
         "operationId": "findById_1",
@@ -650,7 +653,7 @@
       },
       "delete": {
         "tags": [
-          "project-controller"
+          "Project management APIs"
         ],
         "summary": "Delete an task",
         "operationId": "deleteById_1",
@@ -703,8 +706,9 @@
     "/api/v1/departments/{departmentId}": {
       "get": {
         "tags": [
-          "department-controller"
+          "Department management APIs"
         ],
+        "summary": "Get an department",
         "operationId": "findById_2",
         "parameters": [
           {
@@ -719,7 +723,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "The department was successfully received ",
             "content": {
               "application/json": {
                 "schema": {
@@ -729,9 +733,9 @@
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Validation error : The id should not be null or <= 0",
             "content": {
-              "*/*": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiError"
                 }
@@ -752,8 +756,9 @@
       },
       "delete": {
         "tags": [
-          "department-controller"
+          "Department management APIs"
         ],
+        "summary": "Delete an department",
         "operationId": "deleteById_2",
         "parameters": [
           {
@@ -768,7 +773,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "The department was successfully deleted ",
             "content": {
               "application/json": {
                 "schema": {
@@ -779,9 +784,9 @@
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Validation error : The id should not be null or <= 0",
             "content": {
-              "*/*": {
+              "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiError"
                 }
